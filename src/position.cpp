@@ -10,4 +10,25 @@ namespace NM {
         x = 0;
         y = 0;
     }
+    
+    double Position::absoluteDistance(const NM::Position &other) const {
+        double xdist = x - other.x;
+        double ydist = y - other.y;
+        return sqrt(xdist * xdist + ydist * ydist);
+    }
+    
+    Position::Position(const Position &other) {
+        x = other.x;
+        y = other.y;
+    }
+    
+    bool Position::operator==(const NM::Position &o) {
+        return (x == o.x) && (y == o.y);
+    }
+    
+    bool Position::operator!=(const NM::Position &o) {
+        return ! (*this == o);
+    }
+    
+    
 }
