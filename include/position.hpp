@@ -8,8 +8,22 @@ namespace NM {
     class Position {
         
     public:
+        /**
+         * x coordinate of this position.
+         *
+         * Positions are defined such that the top-left corner of the grid is (0,0).
+         * The X axis runs from left to right, increasing as you move right.
+         */
         int64_t x;
+        
+        /**
+         * y coordinate of this position.
+         *
+         * Positions are defined such that the top-right corner of the grid is (0,0).
+         * The Y axis runs up and down, increasing as you move downwards.
+         */
         int64_t y;
+        
         /**
          * Basic construction of a position with x and y coordinates
          */
@@ -34,6 +48,13 @@ namespace NM {
         
         bool operator!=(const Position &);
         
+        /**
+         Get the absolute pythagorean distance from one position to another.
+         @param other
+                The other position to find the absolute distance to
+         
+         @return the distance
+         */
         double absoluteDistance(const Position &other) const;
     };
     
