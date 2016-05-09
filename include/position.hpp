@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <cmath>
+#include <sstream>
 
 namespace NM {
     class Position {
@@ -69,6 +70,8 @@ namespace NM {
     NM::Position operator*(NM::Position p, T o) {
         return o * p;
     }
+    
+    std::string inspect(const NM::Position& p);
 }
 
 

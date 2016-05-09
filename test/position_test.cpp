@@ -50,3 +50,8 @@ TEST_CASE("Equality comparison") {
     NM::Position q(4,5);
     REQUIRE(q == p);
 }
+
+TEST_CASE("Inspection") {
+    NM::Position p(0,0);
+    REQUIRE(NM::inspect(p) == "Position: (0, 0)");
+}

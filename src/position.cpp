@@ -30,5 +30,11 @@ namespace NM {
         return ! (*this == o);
     }
     
+    std::string inspect(const NM::Position &p) {
+        std::stringstream s;
+        s << "Position: (" << p.x << ", " << p.y << ")";
+        return s.str();
+    }
+    
     
 }
