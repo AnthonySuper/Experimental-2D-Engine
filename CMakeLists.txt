@@ -6,24 +6,33 @@ enable_testing()
 
 set(PROJECT_SRCS
   src/util.cpp
-  src/position.cpp
-  src/game_grid.cpp
-  src/player.cpp
-  src/actor.cpp)
+  src/vector.cpp
+  src/polygon.cpp)
 
 set(PROJECT_INCLUDES
   include/util.hpp
-  include/position.hpp
-  include/game_grid.hpp
-  include/player.hpp
-  include/actor.hpp)
+  include/vector.hpp
+  include/polygon.hpp)
 
 add_executable(app app.cpp ${PROJECT_SRCS} ${PROJECT_INCLUDES})
 
 target_link_libraries(app
   ${CMAKE_SOURCE_DIR}/mruby/build/host/lib/libmruby.a)
 
+set(Boost_USE_STATIC_LIBS OFF)
+
+set(Boost_USE_MULTITHREADED ON)
+
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall")
+
+find_package(Boost 1.60 REQUIRED COMPONENTS system regex)
+
+include_directories(app ${Boost_INCLUDE_DIRS})
+
+
+target_link_libraries(app ${Boost_LIBRARIES})
+
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -40,9 +49,8 @@ target_include_directories(Catch INTERFACE "lib/")
 add_executable(catch_test test/main.cpp 
   ${PROJECT_SRCS}
   test/test_util.cpp
-  test/position_test.cpp
-  test/actor_test.cpp
-  test/player_test.cpp)
+  test/vector_test.cpp
+  test/polygon_test.cpp)
 
 
 target_link_libraries(catch_test Catch)

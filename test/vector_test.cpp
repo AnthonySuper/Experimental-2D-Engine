@@ -1,14 +1,15 @@
 #include "catch.hpp"
-#include "position.hpp"
+#include "vector.hpp"
 
-TEST_CASE("Position constructs properly with arguments") {
-    NM::Position p(10, 15);
+
+TEST_CASE("Vector constructs properly with arguments") {
+    NM::Vector p(10, 15);
     REQUIRE(p.x == 10);
     REQUIRE(p.y == 15);
 }
 
-TEST_CASE("Position constructrs properly without arguments") {
-    NM::Position p;
+TEST_CASE("Vector constructrs properly without arguments") {
+    NM::Vector p;
     REQUIRE(p.x == 0);
     REQUIRE(p.y == 0);
 }
@@ -16,42 +17,48 @@ TEST_CASE("Position constructrs properly without arguments") {
 TEST_CASE("Absolute distance works") {
     
     SECTION("When starting at zero") {
-        NM::Position p(0,0);
-        NM::Position o(1,1);
+        NM::Vector p(0,0);
+        NM::Vector o(1,1);
         REQUIRE(p.absoluteDistance(o) == o.absoluteDistance(p));
         REQUIRE(p.absoluteDistance(o) == Approx(1.41421356237));
     }
     
     SECTION("When starting at nonzero") {
-        NM::Position p(3,3);
-        NM::Position o(5,2);
+        NM::Vector p(3,3);
+        NM::Vector o(5,2);
         REQUIRE(p.absoluteDistance(o) == Approx(2.2360679775));
     }
 }
 
+TEST_CASE("Proper unit vectors") {
+    NM::Vector p(10, 0);
+    REQUIRE(p.unitVector() == NM::Vector(1,0));
+}
+
+
 TEST_CASE("Scalar multiplication") {
     SECTION("When scalar is first") {
-        NM::Position p(4,5);
-        NM::Position res = 10 * p;
+        NM::Vector p(4,5);
+        NM::Vector res = 10 * p;
         REQUIRE(res.x == 40);
         REQUIRE(res.y == 50);
     }
     
     SECTION("When scalar is second") {
-        NM::Position p(4,5);
-        NM::Position res = p * 10;
+        NM::Vector p(4,5);
+        NM::Vector res = p * 10;
         REQUIRE(res.x == 40);
         REQUIRE(res.y == 50);
     }
 }
 
 TEST_CASE("Equality comparison") {
-    NM::Position p(4,5);
-    NM::Position q(4,5);
+    NM::Vector p(4,5);
+    NM::Vector q(4,5);
     REQUIRE(q == p);
 }
 
 TEST_CASE("Inspection") {
-    NM::Position p(0,0);
-    REQUIRE(NM::inspect(p) == "Position: (0, 0)");
+    NM::Vector p(0,0);
+    REQUIRE(NM::inspect(p) == "Vector: (0, 0)");
 }
