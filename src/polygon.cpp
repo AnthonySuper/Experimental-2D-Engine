@@ -7,6 +7,11 @@ namespace NM {
         calcCentroid();
     }
     
+    Polygon::Polygon(std::vector<Point> ps) {
+        points = ps;
+        calcCentroid();
+    }
+    
     void Polygon::translateVia(const NM::Vector &v) {
         
         for(auto p: points) {
@@ -72,12 +77,10 @@ namespace NM {
     // TODO: Optimize this
     std::tuple<double, double> Polygon::minAndMaxScalarProjection(NM::Vector line) const {
         auto normal = line.unitVector();
-        double a = points[0].dotProduct(normal);
-        double b = points[1].dotProduct(normal);
-        double min = std::min(a, b);
-        double max = std::max(a, b);
-        for(int i = 2; i < points.size(); ++i) {
-            double r = points[i].dotProduct(normal);
+        double min = std::numeric_limits<double>::min();
+        double max = std::numeric_limits<double>::max();
+        for(auto &point: points) {
+            double r = point.dotProduct(normal);
             min = std::min(min, r);
             max = std::max(max, r);
         }

@@ -11,6 +11,7 @@ namespace NM {
     class Polygon {
     public:
         Polygon(std::initializer_list<Point>);
+        Polygon(std::vector<Point>);
         
         CollisionResult preciseCollision(const Polygon &other);
         

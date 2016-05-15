@@ -6,6 +6,7 @@
 #include <sstream>
 
 namespace NM {
+    
     class Vector {
         
     public:
@@ -58,7 +59,7 @@ namespace NM {
         /**
          Determine the inner product of this vector and another vector.
          */
-        double dotProduct(const Vector &) const;
+        double dotProduct(const Vector &o) const;
         
         /**
          Get the absolute pythagorean distance from one Vector to another.
@@ -99,8 +100,58 @@ namespace NM {
         return NM::Vector(v.x + s.x, v.y + s.y);
     }
     
-    
     std::string inspect(const NM::Vector& p);
+    
+    /*
+     --------------
+     The following all are declared inline as they are extremely small functions that perform best when inlined.
+     I benchmarked this and saw significent speedups when the functions were declared this way as opposed to in a 
+     seperate .cpp file. I'm pretty sure that link-time optimization should be inlining these functions anyway
+     but it's not doing that, apparently.
+     */
+    
+    inline double Vector::dotProduct(const Vector &o) const {
+        return x * o.x + y * o.y;
+    }
+    
+    inline Vector::Vector(double x, double y) {
+        this->x = x;
+        this->y = y;
+    }
+    
+    inline Vector::Vector() {
+        x = 0;
+        y = 0;
+    }
+    
+    inline double Vector::absoluteDistance(const NM::Vector &other) const {
+        double xdist = x - other.x;
+        double ydist = y - other.y;
+        return sqrt(xdist * xdist + ydist * ydist);
+    }
+    
+    inline Vector::Vector(const Vector &other) {
+        x = other.x;
+        y = other.y;
+    }
+    
+    inline bool Vector::operator==(const NM::Vector &o) {
+        return (x == o.x) && (y == o.y);
+    }
+    
+    inline bool Vector::operator!=(const NM::Vector &o) {
+        return ! (*this == o);
+    }
+    
+    inline std::string inspect(const NM::Vector &p) {
+        std::stringstream s;
+        s << "Vector: (" << p.x << ", " << p.y << ")";
+        return s.str();
+    }
+    
+    inline Vector Vector::unitVector() const {
+        return (1.0/sqrt(dotProduct(*this))) * (*this);
+    }
 }
 
 
