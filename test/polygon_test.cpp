@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "polygon.hpp"
+#include <iostream>
 
 TEST_CASE("Collisions with squares"){
     NM::Polygon g{{0,0}, {3,0}, {3,3}, {0,3}};
@@ -11,6 +12,7 @@ TEST_CASE("Collisions with squares"){
     
     SECTION("Negative collision") {
         NM::Polygon q{{4,4}, {6,4}, {6,6}, {4,6}};
+        auto res = q.preciseCollision(g);
         REQUIRE(!q.preciseCollision(g));
         REQUIRE(!g.preciseCollision(q));
     }

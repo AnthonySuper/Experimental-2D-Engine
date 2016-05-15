@@ -11,9 +11,12 @@ namespace NM {
     class Polygon {
     public:
         Polygon(std::initializer_list<Point>);
+        
         Polygon(std::vector<Point>);
         
-        CollisionResult preciseCollision(const Polygon &other);
+        Polygon(const Polygon&);
+        
+        CollisionResult preciseCollision(const Polygon &other) const;
         
         void translateVia(const Vector &v);
         

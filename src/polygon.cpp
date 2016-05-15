@@ -12,6 +12,11 @@ namespace NM {
         calcCentroid();
     }
     
+    Polygon::Polygon(const Polygon &other) {
+        points = other.points;
+        centroid = other.centroid;
+    }
+    
     void Polygon::translateVia(const NM::Vector &v) {
         
         for(auto p: points) {
@@ -48,12 +53,16 @@ namespace NM {
     }
     
     
-    CollisionResult Polygon::preciseCollision(const NM::Polygon &other) {
+    CollisionResult Polygon::preciseCollision(const NM::Polygon &other) const {
+        if(other.points.size() < points.size()) {
+            return other.preciseCollision(*this);
+        }
         double minOverlap = std::numeric_limits<double>::max();
         Vector mtv = {0, 0};
-        for(int i = 0; i < points.size(); ++i) {
-            Point &first = points.at(i);
-            Point &second = (i == (points.size() - 1)) ? points.at(0) : points.at(i + 1);
+        size_t size = points.size();
+        for(int i = 0; i < size; ++i) {
+            const Point &first = points[i];
+            const Point &second = (i == (size - 1)) ? points[0] : points[i + 1];
             Vector axis = (first - second);
             auto ourPoints = minAndMaxScalarProjection(axis.unitVector());
             auto theirPoints = other.minAndMaxScalarProjection(axis.unitVector());
@@ -77,8 +86,8 @@ namespace NM {
     // TODO: Optimize this
     std::tuple<double, double> Polygon::minAndMaxScalarProjection(NM::Vector line) const {
         auto normal = line.unitVector();
-        double min = std::numeric_limits<double>::min();
-        double max = std::numeric_limits<double>::max();
+        double min = std::numeric_limits<double>::max();
+        double max = std::numeric_limits<double>::min();
         for(auto &point: points) {
             double r = point.dotProduct(normal);
             min = std::min(min, r);

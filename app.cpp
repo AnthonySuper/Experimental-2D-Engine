@@ -8,14 +8,24 @@
 
 
 int main() {
+    int itcount = 0;
     std::vector<NM::Point> pas, pbs;
     for(double i = 0; i < M_PI_2; i += 0.0001) {
         pas.emplace_back(std::cos(i), std::sin(i));
-        pbs.emplace_back(std::cos(i) + 0.9, std::sin(i) + 0.9);
+        if(itcount % 1 == 0){
+            pbs.emplace_back(std::cos(i) + 0.9, std::sin(i) + 0.9);
+        }
+        itcount++;
     }
+    
     NM::Polygon circle_a(pas);
     NM::Polygon circle_b(pbs);
-
-    std::cout << NM::inspect(circle_a.preciseCollision(circle_b));
-    
+    auto begin = std::chrono::high_resolution_clock::now();
+    std::cout << NM::inspect(circle_a.preciseCollision(circle_b)) << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
+    begin = std::chrono::high_resolution_clock::now();
+    std::cout << NM::inspect(circle_b.preciseCollision(circle_a)) << std::endl;
+    end = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
 }
