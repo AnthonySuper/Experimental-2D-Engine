@@ -15,7 +15,7 @@ namespace NM {
          * Vectors are defined such that the top-left corner of the grid is (0,0).
          * The X axis runs from left to right, increasing as you move right.
          */
-        int64_t x;
+        double x;
         
         /**
          * y coordinate of this Vector.
@@ -23,12 +23,12 @@ namespace NM {
          * Vectors are defined such that the top-right corner of the grid is (0,0).
          * The Y axis runs up and down, increasing as you move downwards.
          */
-        int64_t y;
+        double y;
         
         /**
          * Basic construction of a Vector with x and y coordinates
          */
-        Vector(int64_t x, int64_t y);
+        Vector(double x, double y);
         
         /**
          * Default constructor sets both values to 0
@@ -45,10 +45,19 @@ namespace NM {
          */
         Vector& operator=(const Vector &) = default;
         
+        /**
+         Determine if a vector is equal to another by comparing their components.
+         */
         bool operator==(const Vector &);
         
+        /**
+         Determine if two vectors are not equal
+         */
         bool operator!=(const Vector &);
         
+        /**
+         Determine the inner product of this vector and another vector.
+         */
         double dotProduct(const Vector &) const;
         
         /**
@@ -63,6 +72,9 @@ namespace NM {
         Vector unitVector() const;
     };
     
+    /**
+     Provide scalar multiplication of vectors
+     */
     template<typename T>
     inline NM::Vector operator*(T o, NM::Vector p) {
         static_assert(std::is_arithmetic<T>::value,
@@ -70,6 +82,10 @@ namespace NM {
         return Vector(o * p.x, o * p.y);
     }
     
+    /**
+     Scalar multiplication should work for either order of arguments
+     (scalar * vector) or (vector * scalar) so we provide this.
+     */
     template<typename T>
     inline NM::Vector operator*(NM::Vector p, T o) {
         return o * p;
@@ -77,6 +93,10 @@ namespace NM {
     
     inline NM::Vector operator-(NM::Vector f, NM::Vector s) {
         return NM::Vector(f.x - s.x, f.y - s.y);
+    }
+    
+    inline NM::Vector operator+(const NM::Vector &v, const NM::Vector &s) {
+        return NM::Vector(v.x + s.x, v.y + s.y);
     }
     
     

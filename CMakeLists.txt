@@ -7,12 +7,14 @@ enable_testing()
 set(PROJECT_SRCS
   src/util.cpp
   src/vector.cpp
-  src/polygon.cpp)
+  src/polygon.cpp
+  src/collision_result.cpp)
 
 set(PROJECT_INCLUDES
   include/util.hpp
   include/vector.hpp
-  include/polygon.hpp)
+  include/polygon.hpp
+  include/collision_result.hpp)
 
 add_executable(app app.cpp ${PROJECT_SRCS} ${PROJECT_INCLUDES})
 
@@ -30,14 +32,13 @@ find_package(Boost 1.60 REQUIRED COMPONENTS system regex)
 
 include_directories(app ${Boost_INCLUDE_DIRS})
 
-
 target_link_libraries(app ${Boost_LIBRARIES})
 
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR} 
+include_directories(${SDL2_INCLUDE_DIR}
   "include/"
   "mruby/include/")
 

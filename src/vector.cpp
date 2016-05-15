@@ -1,7 +1,7 @@
 #include "Vector.hpp"
 
 namespace NM {
-    Vector::Vector(int64_t x, int64_t y) {
+    Vector::Vector(double x, double y) {
         this->x = x;
         this->y = y;
     }
