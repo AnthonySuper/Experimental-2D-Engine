@@ -4,12 +4,16 @@
 #include <stdint.h>
 #include <cmath>
 #include <sstream>
+#include <mrb_wrapper.hpp>
 
 namespace NM {
     
     class Vector {
         
+        
     public:
+        constexpr const static struct mrb_data_type mrb_type = {"nm_vector", &NM::mrb_destructor_value<Vector>};
+        
         /**
          * x coordinate of this Vector.
          *
@@ -152,6 +156,7 @@ namespace NM {
     inline Vector Vector::unitVector() const {
         return (1.0/sqrt(dotProduct(*this))) * (*this);
     }
+    
 }
 
 

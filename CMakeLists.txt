@@ -13,7 +13,8 @@ set(PROJECT_INCLUDES
   include/util.hpp
   include/vector.hpp
   include/polygon.hpp
-  include/collision_result.hpp)
+  include/collision_result.hpp
+  include/mrb_wrapper.hpp)
 
 add_executable(app app.cpp ${PROJECT_SRCS} ${PROJECT_INCLUDES})
 
