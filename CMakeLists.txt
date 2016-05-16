@@ -6,6 +6,7 @@ enable_testing()
 
 set(PROJECT_SRCS
   src/util.cpp
+  src/vector.cpp
   src/polygon.cpp
   src/collision_result.cpp)
 

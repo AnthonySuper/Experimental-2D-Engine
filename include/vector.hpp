@@ -12,7 +12,7 @@ namespace NM {
         
         
     public:
-        constexpr const static struct mrb_data_type mrb_type = {"nm_vector", &NM::mrb_destructor_value<Vector>};
+        const static struct mrb_data_type mrb_type;
         
         /**
          * x coordinate of this Vector.
@@ -73,6 +73,7 @@ namespace NM {
          @return the distance
          */
         double absoluteDistance(const Vector &other) const;
+        
         
         Vector unitVector() const;
     };
