@@ -4,6 +4,7 @@
 #include <mruby/compile.h>
 #include <mruby/data.h>
 #include <mruby/string.h>
+#include <mruby/variable.h>
 #include <chrono>
 #include "vector.hpp"
 
@@ -23,16 +24,17 @@ static mrb_value make_vector(mrb_state *st, mrb_value self) {
 
 
 int main() {
+    Vector vec(100,1);
     mrb_state *mrb = mrb_open();
     klass = mrb_define_class(mrb, "Vector", mrb->object_class);
     mrb_define_class_method(mrb, klass, "new", make_vector, MRB_ARGS_REQ(2));
-    mrb_callable c = &mrb_binder<Vector, double, const Vector&>::const_bound_method<&Vector::absoluteDistance>::value;
-    mrb_define_method(mrb, klass, "absolute_distance", c, MRB_ARGS_REQ(1));
-    mrb_load_string(mrb, "puts Vector.new(10,11).absolute_distance(Vector.new(10,12))");
-    
-    if(mrb->exc) {
-        std::cout << "Whata surprise, we have an exception" << std::endl;
-        std::cout << RSTRING_PTR(mrb_funcall(mrb, mrb_obj_value(mrb->exc), "inspect", 0)) << std::endl;
-    }
-    
+    NM::mrb::callable dist = mrb::binder<Vector, double, const Vector&>::const_bound_method<&NM::Vector::absoluteDistance>::method;
+    NM::mrb::callable add = mrb::binder<Vector, Vector, const Vector&>::const_bound_method<&NM::Vector::add>::method;
+    NM::mrb::callable getX = mrb::binder<Vector, double>::const_bound_method<&NM::Vector::getX>::method;
+    mrb_define_method(mrb, klass, "+", add, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, klass, "absolute_distance", dist, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, klass, "x", getX, MRB_ARGS_NONE());
+    mrb_sym v = mrb_intern_cstr(mrb, "$v");
+    mrb_gv_set(mrb, v, mrb::to_value(mrb, vec));
+    mrb_load_string(mrb, "puts $v.x");
 }

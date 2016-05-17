@@ -22,6 +22,8 @@ namespace NM {
          */
         double x;
         
+        double getX() const { return x; }
+        
         /**
          * y coordinate of this Vector.
          *
@@ -29,6 +31,9 @@ namespace NM {
          * The Y axis runs up and down, increasing as you move downwards.
          */
         double y;
+        
+        double getY() const { return y; }
+        
         
         /**
          * Basic construction of a Vector with x and y coordinates
@@ -74,7 +79,7 @@ namespace NM {
          */
         double absoluteDistance(const Vector &other) const;
         
-        
+        Vector add(const Vector &other) const;
         Vector unitVector() const;
     };
     
@@ -103,6 +108,10 @@ namespace NM {
     
     inline NM::Vector operator+(const NM::Vector &v, const NM::Vector &s) {
         return NM::Vector(v.x + s.x, v.y + s.y);
+    }
+    
+    inline Vector Vector::add(const Vector& other) const {
+        return *this + other;
     }
     
     std::string inspect(const NM::Vector& p);

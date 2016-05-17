@@ -3,69 +3,79 @@
 //  nmtt
 //
 //  Created by Anthony Super on 5/16/16.
-//
-//
+
 
 #ifndef mrb_wrapper_h
 #define mrb_wrapper_h
+#pragma once
 
 #include <mruby.h>
 #include <mruby/data.h>
 #include <type_traits>
 #include <iostream>
 
-namespace NM {
-    typedef mrb_value (*mrb_callable)(mrb_state*, mrb_value);
+namespace NM::mrb {
+    class BadValueConersion : std::runtime_error {
+        BadValueConersion(std::string &arg) : std::runtime_error(arg) {};
+    };
+    
+    
+    typedef mrb_value (*callable)(mrb_state*, mrb_value);
     
     template<typename T>
-    void mrb_destructor_value(mrb_state *mrb, void *self) {
+    void destructor_value(mrb_state *mrb, void *self) {
         T* type = reinterpret_cast<T*>(self);
         delete type;
     }
     
-    /**
-     Determine if a given type is a struct mrb_data_type
-     Pretty much just a helper function
-     */
-    template<typename T>
-    struct is_mrb_data_type {
-        constexpr static bool value = std::is_same<const struct mrb_data_type, T>::value;
-    };
+    namespace traits {
+        /**
+         Determine if a given type is a struct mrb_data_type
+         Pretty much just a helper function
+         */
+        template<typename T>
+        struct is_data_type_struct {
+            constexpr static bool value = std::is_same<const struct mrb_data_type, T>::value;
+        };
+        
+        /**
+         Type trait which determines if this is a user-defiend object type we can share with MRB.
+         */
+        template<typename T, typename Enable = void>
+        struct is_shared_native {
+            constexpr static bool value = false;
+        };
+        
+        template<typename T>
+        struct is_shared_native <T,
+        typename std::enable_if<is_data_type_struct<decltype(T::mrb_type)>::value>::type> {
+            constexpr static bool value = true;
+        };
+        
+        /**
+         Type trait which determines if this is any type we can share with MRB, including primitive types
+         such as mrb_float, mrb_bool, and so on.
+         */
+        template<typename T>
+        struct is_convertable {
+            constexpr static bool value = (is_shared_native<T>::value
+                                           || std::is_integral<T>::value
+                                           || std::is_same<bool, T>::value
+                                           || std::is_floating_point<T>::value);
+        };
+        
+        
+    }
     
-    /**
-     Type trait which determines if this is a user-defiend object type we can share with MRB.
-     */
-    template<typename T, typename Enable = void>
-    struct is_mrb_object {
-        constexpr static bool value = false;
-    };
-    
     template<typename T>
-    struct is_mrb_object<T,
-    typename std::enable_if<is_mrb_data_type<decltype(T::mrb_type)>::value>::type> {
-        constexpr static bool value = true;
-    };
-    
-    template<typename T>
-    struct mrb_data_type_finder {
-        static const mrb_data_type* data_type() {
-            static_assert(is_mrb_object<typename std::remove_reference<T>::type>::value,
+    struct data_type {
+        static const mrb_data_type* value() {
+            static_assert(traits::is_shared_native<typename std::remove_reference<T>::type>::value,
                           "Can't get an MRB data type for a non-MRB object");
             return &(std::remove_reference<T>::type::mrb_type);
         }
     };
     
-    /**
-     Type trait which determines if this is any type we can share with MRB, including primitive types
-     such as mrb_float, mrb_bool, and so on.
-     */
-    template<typename T>
-    struct is_mrb_shared {
-        constexpr static bool value = (is_mrb_object<T>::value
-                                       || std::is_integral<T>::value
-                                       || std::is_same<bool, T>::value
-                                       || std::is_floating_point<T>::value);
-    };
     
     /**
      mruby's mrb_get_args function takes a printf-style format string to specify argument types
@@ -74,33 +84,36 @@ namespace NM {
      We then specialize it based on the types we can convert to and from mruby types.
      */
     template<typename T, typename Extern = void>
-    struct mrb_param_char {
+    struct param_char {
     };
     
     // o is for object
     template<typename T>
-    struct mrb_param_char<T, typename std::enable_if<is_mrb_object<T>::value>::type> {
+    struct param_char<T, typename std::enable_if<traits::is_shared_native<T>::value>::type> {
         constexpr static const auto value = "o";
     };
     
     // f is for float
     template<typename T>
-    struct mrb_param_char<T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
+    struct param_char<T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
         constexpr static const auto value = "f";
     };
     
     // i is for integer
     template<typename T>
-    struct mrb_param_char<T, typename std::enable_if<std::is_integral<T>::value>::type> {
+    struct param_char<T, typename std::enable_if<std::is_integral<T>::value>::type> {
         constexpr static auto value = "i";
     };
     
     // b is for bool
     template<typename T>
-    struct mrb_param_char<T, typename std::enable_if<std::is_same<bool, T>::value>::type> {
+    struct param_char<T, typename std::enable_if<std::is_same<bool, T>::value>::type> {
         constexpr static auto value = "b";
     };
     
+    
+    template<typename...>
+    struct param_format_string;
     /**
      Obtain the printf-style format specifier required by mrg_get_args.
      
@@ -110,11 +123,11 @@ namespace NM {
      the types.
      */
     template<typename T, typename ...Rest>
-    struct mrb_param_format_string {
+    struct param_format_string<T, Rest...> {
         static std::string value() {
-            static_assert(NM::is_mrb_shared<T>::value,
+            static_assert(traits::is_convertable<T>::value,
                           "Cannot share this value into mruby");
-            return mrb_param_char<typename std::remove_reference<T>::type>::value + mrb_param_format_string<Rest...>::value();
+            return param_char<typename std::remove_reference<T>::type>::value + param_format_string<Rest...>::value();
         }
     };
     
@@ -122,9 +135,16 @@ namespace NM {
      This is the "base case" of the format, where we only have a single type.
      */
     template<typename T>
-    struct mrb_param_format_string<T> {
+    struct param_format_string<T> {
         static std::string value() {
-            return mrb_param_char<typename std::remove_reference<T>::type>::value;
+            return param_char<typename std::remove_reference<T>::type>::value;
+        }
+    };
+    
+    template<>
+    struct param_format_string<> {
+        static std::string value() {
+            return "";
         }
     };
     
@@ -143,49 +163,60 @@ namespace NM {
         }
         
         operator contained_type() {
-            void *p = mrb_data_check_get_ptr(s, b, mrb_data_type_finder<T>::data_type());
+            void *p = mrb_data_check_get_ptr(s, b, data_type<T>::value());
             return *(reinterpret_cast<contained_type*>(p));
         }
-        
     };
+    
+    inline mrb_value to_value(mrb_state *mrb, double d) {
+        return mrb_float_value(mrb, d);
+    }
+    
+    template<typename T>
+    mrb_value to_value(mrb_state *mrb, T obj) {
+        static_assert(traits::is_shared_native<T>::value, "Non-shared data structure passed");
+        const mrb_data_type *type = data_type<T>::value();
+        struct RClass* klass = mrb_class_get(mrb, type->struct_name);
+        T *n = new T(obj);
+        return mrb_obj_value(Data_Wrap_Struct(mrb, klass, type, n));
+    }
+    
     
     
     template<typename T, typename Ret, typename ...Args>
-    struct mrb_binder {
-        static_assert(is_mrb_shared<T>::value, "must be an MRB type");
-        
+    struct binder {
+        static_assert(traits::is_convertable<T>::value, "Bound types need to be a convertable type");
         typedef Ret (T::*funcType)(Args...);
-        
         typedef Ret (T::*constFuncType)(Args...) const;
-        
         
         template<funcType func>
         struct bound_method {
-            static mrb_value value(mrb_state *mrb, mrb_value self) {
-                std::string format = mrb_param_format_string<Args...>::value();
+            static mrb_value method(mrb_state *mrb, mrb_value self) {
+                std::string format = param_format_string<Args...>::value();
                 std::tuple<mrb_conversion_helper<Args>...> t;
                 fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                 fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
-                void *p =mrb_data_check_get_ptr(mrb, self, mrb_data_type_finder<T>::data_type());
+                void *p =mrb_data_check_get_ptr(mrb, self, data_type<T>::value());
                 T *s = reinterpret_cast<T*>(p);
                 Ret re = make_call(s, func, t, std::index_sequence_for<Args...>{});
-                return mrb_nil_value();
+                return to_value(mrb, re);
             }
         };
+        
         
         // Functions marked const are weird and extremely annoying
         template<constFuncType func>
         struct const_bound_method {
-            static mrb_value value(mrb_state *mrb, mrb_value self) {
-                std::string format = mrb_param_format_string<Args...>::value();
+            static mrb_value method(mrb_state *mrb, mrb_value self) {
+                std::string format = param_format_string<Args...>::value();
                 std::cout << std::endl << format << std::endl;
                 std::tuple<mrb_conversion_helper<Args>...> t;
                 fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                 fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
-                void *p =mrb_data_check_get_ptr(mrb, self, mrb_data_type_finder<T>::data_type());
+                void *p =mrb_data_check_get_ptr(mrb, self, data_type<T>::value());
                 T *s = reinterpret_cast<T*>(p);
                 Ret re = make_const_call(s, func, t, std::index_sequence_for<Args...>{});
-                return mrb_float_value(mrb, re);
+                return to_value(mrb, re);
             }
         };
         
@@ -231,8 +262,6 @@ namespace NM {
         }
         
     };
-    
-    
     
 }
 
