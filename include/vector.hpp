@@ -12,6 +12,11 @@ namespace NM {
         
         
     public:
+        
+        friend void bindVector(mrb_state *mrb);
+        
+        friend struct mrb::translator<Vector>;
+        
         const static struct mrb_data_type mrb_type;
         
         /**
@@ -22,7 +27,7 @@ namespace NM {
          */
         double x;
         
-        double getX() const { return x; }
+
         
         /**
          * y coordinate of this Vector.
@@ -31,8 +36,6 @@ namespace NM {
          * The Y axis runs up and down, increasing as you move downwards.
          */
         double y;
-        
-        double getY() const { return y; }
         
         
         /**
@@ -79,8 +82,25 @@ namespace NM {
          */
         double absoluteDistance(const Vector &other) const;
         
-        Vector add(const Vector &other) const;
         Vector unitVector() const;
+        
+    private:
+        
+        Vector add(const Vector &other) const;
+        
+        double getY() const { return y; }
+        
+        double setY(double _y) {
+            y = _y;
+            return y;
+        }
+        
+        double getX() const { return x; }
+        
+        double setX(double _x) {
+            x = _x;
+            return x;
+        }
     };
     
     /**
@@ -113,6 +133,9 @@ namespace NM {
     inline Vector Vector::add(const Vector& other) const {
         return *this + other;
     }
+    
+    
+    void bindVector(mrb_state *mrb);
     
     std::string inspect(const NM::Vector& p);
     
