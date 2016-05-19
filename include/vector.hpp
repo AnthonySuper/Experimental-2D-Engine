@@ -8,13 +8,28 @@
 
 namespace NM {
     
+    /**
+     @breif A class representing a vector in 2D space
+     
+     @discussion This type represents either a vector or a point in space, and is
+     used heavily throughout the rest of the engine. It has two members, X and Y.
+     Y runs vertically on a screen, X horizontally.
+     The top-left corner of the coordinate grid is defined as (0, 0).
+     Y increases as you move downwards on the grid, and X increases as you move right.
+     This is a vertical flip of the typical coordinate system, mostly because SDL uses the same thing.
+     */
     class Vector {
         
         
     public:
-        
+        /**
+         Funciton to bind this class into an instance of MRB.
+         */
         static void bindMRB(mrb_state *mrb);
-    
+        
+        /**
+         Static type information that allows us to use this type from Ruby.
+         */
         const static struct mrb_data_type mrb_type;
         
         /**
@@ -28,21 +43,23 @@ namespace NM {
 
         
         /**
-         * y coordinate of this Vector.
+         * @breif y coordinate of this Vector.
          *
-         * Vectors are defined such that the top-right corner of the grid is (0,0).
+         * @remark Vectors are defined such that the top-right corner of the grid is (0,0).
          * The Y axis runs up and down, increasing as you move downwards.
          */
         double y;
         
         
         /**
-         * Basic construction of a Vector with x and y coordinates
+         @breif Basic construction of a Vector with x and y coordinates
+         @param x The x value of the new vector
+         @param y The y value of the new vector
          */
         Vector(double x, double y);
         
         /**
-         * Default constructor sets both values to 0
+         * @brief Default constructor creates the vector {0,0};
          */
         Vector();
         
@@ -62,7 +79,8 @@ namespace NM {
         bool operator==(const Vector &);
         
         /**
-         Determine if two vectors are not equal
+         @breif Determine if two vectors are not equal
+         @see operator==
          */
         bool operator!=(const Vector &);
         
@@ -72,7 +90,10 @@ namespace NM {
         double dotProduct(const Vector &o) const;
         
         /**
-         Get the absolute pythagorean distance from one Vector to another.
+         @brief Get the absolute distance from one Vector to another.
+         
+         @remark We define distance in terms of the standard inner product, or geometric distnace.
+         
          @param other
                 The other Vector to find the absolute distance to
          
@@ -80,6 +101,11 @@ namespace NM {
          */
         double absoluteDistance(const Vector &other) const;
         
+        /**
+         Optain a unit vector in the directio of this vector,
+         that is, a vector of length one pointing in the same direction
+         as this vector. Useful for all kinds of linear algebra-ey things.
+         */
         Vector unitVector() const;
         
     private:
