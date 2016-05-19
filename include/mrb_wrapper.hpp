@@ -13,20 +13,19 @@
 #include <mruby/data.h>
 #include <type_traits>
 #include <iostream>
-
-
+#include <vector>
 
 namespace NM::mrb {
     
-    
-    class BadValueConersion : std::runtime_error {
-        BadValueConersion(std::string &arg) : std::runtime_error(arg) {};
+    class BadValueConersion : std::logic_error {
+    public:
+        
+        BadValueConersion(std::string &arg) : std::logic_error(arg) {};
+        BadValueConersion(const char *w) : std::logic_error(w) {};
     };
     
     
     typedef mrb_value (*callable)(mrb_state*, mrb_value);
-    
-    typedef void (*bindFunction)(mrb_state*);
     
     
     template<typename T>
@@ -80,9 +79,10 @@ namespace NM::mrb {
     template<typename T>
     struct data_type {
         static const mrb_data_type* value() {
-            static_assert(traits::is_shared_native<typename std::remove_reference<T>::type>::value,
+            using rt = typename std::remove_reference<typename std::remove_pointer<T>::type>::type;
+            static_assert(traits::is_shared_native<rt>::value,
                           "Can't get an MRB data type for a non-MRB object");
-            return &(std::remove_reference<T>::type::mrb_type);
+            return &(std::remove_reference<rt>::type::mrb_type);
         }
     };
     
@@ -121,8 +121,122 @@ namespace NM::mrb {
         return mrb_obj_value(Data_Wrap_Struct(mrb, klass, type, n));
     }
     
+    template<typename T>
+    typename std::enable_if<traits::is_shared_native<typename std::remove_pointer<T>::type>::value &&
+    std::is_pointer<T>::value, mrb_value>::type to_value
+    (mrb_state *mrb, T obj) {
+        const mrb_data_type *type = data_type<typename std::remove_pointer<T>::type>::value();
+        struct RClass *klass = mrb_class_get(mrb, type->struct_name);
+        return mrb_obj_value(Data_Wrap_Struct(mrb, klass, type, obj));
+    }
+    
+    inline std::string native_typename(mrb_value val) {
+        return std::string{"Native type: "} + DATA_TYPE(val)->struct_name;
+    }
+    
+    inline std::string data_type_string(mrb_value val) {
+        switch(mrb_type(val)) {
+            case MRB_TT_TRUE:
+            case MRB_TT_FALSE:
+                return "bool";
+            case MRB_TT_FIXNUM:
+                return "fixnum";
+            case MRB_TT_STRING:
+                return "string";
+            case MRB_TT_FLOAT:
+                return "float";
+            case MRB_TT_EXCEPTION:
+                return "exception";
+            case MRB_TT_OBJECT:
+                return "object";
+            case MRB_TT_CPTR:
+                return "cptr";
+            case MRB_TT_DATA:
+                return native_typename(val);
+            default:
+                return "Something weird";
+        }
+    }
     
     
+    template<typename T>
+    typename std::enable_if<std::is_integral<T>::value, T>::type from_value(mrb_state *mrb, mrb_value val) {
+        switch(mrb_type(val)) {
+            case MRB_TT_FIXNUM:
+                return (T) (mrb_float) mrb_fixnum(val);
+                break;
+            case MRB_TT_FLOAT:
+                return (T) mrb_float(val);
+                break;
+            default:
+                auto q = std::string{"Expected a fixnum/integer, recieved a "} + data_type_string(val);
+                throw BadValueConersion{q};
+        }
+    }
+    
+    template<typename T>
+    typename std::enable_if<std::is_floating_point<T>::value, T>::type from_value(mrb_state *mrb, mrb_value val) {
+        switch(mrb_type(val)) {
+            case MRB_TT_FLOAT:
+                return (T) (mrb_int) (mrb_fixnum(val));
+                break;
+            case MRB_TT_FIXNUM:
+                return (T) (mrb_fixnum(val));
+                break;
+            default:
+                auto q =std::string{"Expected a float, recieved a "} + data_type_string(val);
+                throw BadValueConersion("Value given was not a float");
+        }
+    }
+    
+    template<typename T>
+    typename std::enable_if<traits::is_shared_native<typename std::remove_reference<typename std::remove_pointer<T>::type>::type>::value>::type conversion_check(mrb_state *mrb, mrb_value val) {
+        using Ti = typename std::remove_reference<typename std::remove_pointer<T>::type>::type;
+        auto type = data_type<T>::value();
+        
+        if(mrb_type(val) != MRB_TT_DATA) {
+            auto q = std::string{"Expected a native type, recieved "} + data_type_string(val);
+            throw BadValueConersion{q};
+        }
+        
+        if(DATA_TYPE(val) != type) {
+            // Super expensive operation, but this just crashes the engine anyway, so who cares
+            auto real_type = data_type_string(val);
+            auto expected_type = std::string{DATA_TYPE(val)->struct_name};
+            auto q = std::string{"Expected native type "} + expected_type + " got " + real_type;
+            throw BadValueConersion{q};
+        }
+    }
+    
+    
+    template<typename T>
+    typename std::enable_if<std::is_pointer<T>::value &&
+    traits::is_shared_native<typename std::remove_pointer<T>::type>::value, T>::type
+    from_value(mrb_state *mrb, mrb_value val) {
+        const mrb_data_type *type = data_type<T>::value();
+        conversion_check<T>(mrb, val);
+        void *ptr = mrb_data_check_get_ptr(mrb, val, type);
+        return static_cast<T>(ptr);
+    }
+    
+    template<typename T>
+    typename std::enable_if<(! std::is_pointer<T>::value) &&
+    traits::is_shared_native<T>::value, T>::type from_value(mrb_state *mrb, mrb_value val) {
+        using ptr = typename std::add_pointer<typename std::remove_reference<T>::type>::type;
+        const mrb_data_type *type = data_type<T>::value();
+        conversion_check<T>(mrb, val);
+        // copy construct a new value
+        void *p = mrb_data_get_ptr(mrb, val, type);
+        // Kind of unclear what we're doing here.
+        // Basically, we cast the void * p to a type of T*
+        // We than dereference this ptr to cause the copy constructor to be invoked
+        return * static_cast<ptr>(p);
+    }
+    
+    
+    
+    
+
     
     /**
      mruby's mrb_get_args function takes a printf-style format string to specify argument types

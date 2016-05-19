@@ -13,10 +13,8 @@ namespace NM {
         
     public:
         
-        friend void bindVector(mrb_state *mrb);
-        
-        friend struct mrb::translator<Vector>;
-        
+        static void bindMRB(mrb_state *mrb);
+    
         const static struct mrb_data_type mrb_type;
         
         /**
@@ -134,9 +132,6 @@ namespace NM {
         return *this + other;
     }
     
-    
-    void bindVector(mrb_state *mrb);
-    
     std::string inspect(const NM::Vector& p);
     
     /*
@@ -171,6 +166,7 @@ namespace NM {
         x = other.x;
         y = other.y;
     }
+   
     
     inline bool Vector::operator==(const NM::Vector &o) {
         return (x == o.x) && (y == o.y);

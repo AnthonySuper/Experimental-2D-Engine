@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include "vector.hpp"
-
+#include <mruby/compile.h>
 
 TEST_CASE("Vector constructs properly with arguments") {
     NM::Vector p(10, 15);
@@ -61,4 +61,12 @@ TEST_CASE("Equality comparison") {
 TEST_CASE("Inspection") {
     NM::Vector p(0,0);
     REQUIRE(NM::inspect(p) == "Vector: (0, 0)");
+}
+
+TEST_CASE("Mruby bindings construct properly") {
+    mrb_state *mrb = mrb_open();
+    NM::Vector::bindMRB(mrb);
+    mrb_value v = mrb_load_string(mrb, "Vector.new(10, 11)");
+    NM::Vector vec = NM::mrb::from_value<NM::Vector>(mrb, v);
+    
 }

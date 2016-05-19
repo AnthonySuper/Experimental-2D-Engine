@@ -4,7 +4,7 @@ namespace NM {
     
     const struct mrb_data_type Vector::mrb_type =  {"Vector", &NM::mrb::destructor_value<Vector>};
     
-    void bindVector(mrb_state *mrb) {
+    void Vector::bindMRB(mrb_state *mrb) {
         std::cout << "test " << std::endl;
         using namespace NM;
         using t = mrb::translator<Vector>;
