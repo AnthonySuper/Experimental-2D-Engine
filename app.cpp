@@ -14,10 +14,8 @@ int main() {
     mrb_state *mrb = mrb_open();
     NM::Vector::bindMRB(mrb);
     mrb_value v = mrb_load_string(mrb, "a = Vector.new(0,0) \n" \
-                    "puts a.inspect \n" \
-                    "a");
-    NM::Vector *vec = NM::mrb::from_value<NM::Vector*>(mrb, v);
-    std::cout << "Got a ptr " << vec << std::endl;
-    
-    
+                    "b = Vector.new(10, 11) \n" \
+                    "puts a.x \n" \
+                    "puts b.x \n" \
+                    "puts \"Absolute distance: #{a.absolute_distance(b)}\" \n ");
 }

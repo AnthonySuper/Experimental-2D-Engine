@@ -15,8 +15,19 @@
 #include <iostream>
 #include <vector>
 
+/**
+ @brief Functions, templtes, and other goodies that let us use mruby with native types
+ 
+ @discussion
+ There's a lot of template metaprogramming going on in this, and it may be slightly overwhelming.
+ The important thing here is to remain calm. Put on some relaxing music.
+ I know I had to when writing this stuff.
+ */
 namespace NM::mrb {
     
+    /**
+     @breif Exception for a bad conversion between an mrb type and a native type
+     */
     class BadValueConersion : std::logic_error {
     public:
         
@@ -25,8 +36,16 @@ namespace NM::mrb {
     };
     
     
+    /**
+     @brief function that mruby can use in method definitions and the like
+     */
     typedef mrb_value (*callable)(mrb_state*, mrb_value);
     
+    
+    /**
+     @brief template to create a destructor function for some type
+     @see is_data_type_struct
+     */
     
     template<typename T>
     void destructor_value(mrb_state *mrb, void *self) {
@@ -34,10 +53,12 @@ namespace NM::mrb {
         delete type;
     }
     
+    /**
+     @brief type traits relating to shared data between C++ and Mruby
+     */
     namespace traits {
         /**
-         Determine if a given type is a struct mrb_data_type
-         Pretty much just a helper function
+         @brief helper to determine if something is a "const struct mrb_data_type" or not
          */
         template<typename T>
         struct is_data_type_struct {
@@ -46,18 +67,35 @@ namespace NM::mrb {
         
         
         /**
-         Type trait which determines if this is a user-defiend object type we can share with MRB.
+         @brief determine if a user-defined object can be shared with MRB
+         
+         @discussion
+         
+         This determines if some user-defined type can be shared with MRB.
+         To determine sharability in the general case, you can use is_converable,
+         which determines if a given type is sharable in any case.
+         
+         A type is sharable with MRB if it has a static member of type "const struct mrb_data_type".
+         This struct will determine the type's Ruby name, as well as a deleter function
+         (which should almost always be a specialization of the `destructor_value` templte).
          */
         template<typename T, typename Enable = void>
         struct is_shared_native {
             constexpr static bool value = false;
         };
         
+        /**
+         @cond 0
+         Turning off documentation here for a second.
+         */
         template<typename T>
         struct is_shared_native <T,
         typename std::enable_if<is_data_type_struct<decltype(T::mrb_type)>::value>::type> {
             constexpr static bool value = true;
         };
+        /**
+         @endcond
+         */
         
         /**
          Type trait which determines if this is any type we can share with MRB, including primitive types
@@ -76,6 +114,10 @@ namespace NM::mrb {
         
     }
     
+    /**
+     @brief get the mrb_data-type struct used to share this type with mruby
+     @see NM::mrb::traits::is_shared_native<T>
+     */
     template<typename T>
     struct data_type {
         static const mrb_data_type* value() {
@@ -262,7 +304,7 @@ namespace NM::mrb {
     
     // i is for integer
     template<typename T>
-    struct param_char<T, typename std::enable_if<std::is_integral<T>::value>::type> {
+    struct param_char<T, typename std::enable_if<std::is_integral<T>::value && ! std::is_same<bool, T>::value>::type> {
         constexpr static auto value = 'i';
     };
     
@@ -294,13 +336,13 @@ namespace NM::mrb {
      Defines a struct that assists in conversion of types from mruby types to C++ types.
      */
     template<typename T, typename U = void>
-    struct mrb_conversion_helper {
+    struct conversion_helper {
     };
     
     
     // Specialization for floating point types
     template<typename T>
-    struct mrb_conversion_helper<T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
+    struct conversion_helper<T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
         mrb_float d;
         mrb_state *mrb;
         
@@ -316,7 +358,7 @@ namespace NM::mrb {
     
     // Specialization for integral types
     template<typename T>
-    struct mrb_conversion_helper<T,
+    struct conversion_helper<T,
     typename std::enable_if<std::is_integral<T>::value>::type> {
         mrb_int i;
         mrb_state *mrb;
@@ -331,7 +373,7 @@ namespace NM::mrb {
     };
     
     // Specialization for strings
-    template<> struct mrb_conversion_helper<std::string> {
+    template<> struct conversion_helper<std::string> {
         char *ptr;
         mrb_state *mrb;
         
@@ -349,7 +391,7 @@ namespace NM::mrb {
      This works for reference types and value types, pointer types are handled seperately
      */
     template<typename T>
-    struct mrb_conversion_helper<T,
+    struct conversion_helper<T,
     typename std::enable_if<traits::is_shared_native<typename std::remove_reference<T>::type>::value>::type> {
         
         typedef typename std::remove_reference<T>::type contained_type;
@@ -371,7 +413,7 @@ namespace NM::mrb {
     };
     
     template<typename T>
-    struct mrb_conversion_helper<T,
+    struct conversion_helper<T,
     typename std::enable_if< traits::is_shared_native<typename std::remove_pointer<T>::type>::value
     && std::is_pointer<T>::value>::type> {
         mrb_value v;
@@ -388,7 +430,47 @@ namespace NM::mrb {
     };
     
     
-    
+    /**
+     @brief template to help us bind native types to Ruby.
+     
+     @discussion
+     
+     This template class uses a variety of increasingly horrifying metaprogramming techniques to
+     provide a clean(ish) user interface to share C++ classes to Ruby.
+     
+     Let's say I have a type Vector, which has some methods.
+     I can write a "binder function" which takes in an `mrb_state*`.
+     I want to make that function bind a lot of methods into `mrb_state` so I can use my Vector type from ruby.
+     To do so, I can do the following:
+     @code
+     using t = translator<Vector>;
+     t::makeClass(mrb); // pass in the mrb_state and create a new class
+     // bind a constructor that takes two doubles, and calls the C++ constructor with the same parameters
+     // this lets us do Vector.new(a, b) in ruby to get a new native vector type we can use!
+     t::constructor<double, double>::bind(mrb);
+     // bind some methods that return a double and take no arguments
+     using doubleRet = t::method<double>;
+     // bind the `getX` method as `.x` into mruby
+     // we use const_binder because this is a const function
+     doubleRet::const_binder<&Vector::getX>::bind(mrb, "x");
+     doubleRet::const_binder<&Vector::getY>::bind(mrb, "x");
+     // Bind methods that take a double and return a double
+     // the ::method sub-struct takes in the return type of the function to be bound,
+     // then a list of arguments to that function
+     // void return types do not work at the moment, I shall fix that soon.
+     using setters = t::method<double, double>;
+     // Now, if we have a vector `v` in ruby, we can do `v.x = 100` and it will update on our native object!
+     setters::binder<&Vector::setX>::bind(mrb, "x=");
+     setters::binder<&Vector::setY>::bind(mrb, "y=");
+     // This is where things get really cool
+     // We can bind in native types ruby knows about, which will automatically be converted when passed to our
+     // C++ code. This lets us use all our C++ code from Ruby transparently, with no effort!
+     // In this case, we define methods that return a double and have one paramter of type `const Vector&`.
+     using doubleVec = t::method<double, const Vector&>;
+     doubleVec::const_binder<&Vector::absoluteDistance>::bind(mrb, "absolute_distance");
+     doubleVec::const_binder<&Vector::dotProduct>::bind(mrb, "dot");
+     @endcode
+     */
     template<typename T>
     struct translator {
         static_assert(traits::is_shared_native<T>::value,
@@ -413,7 +495,7 @@ namespace NM::mrb {
         private:
             static mrb_value val(mrb_state *mrb, mrb_value self) {
                 std::string format = param_format_string<Args...>::value;
-                std::tuple<mrb_conversion_helper<Args>...> t;
+                std::tuple<conversion_helper<Args>...> t;
                 translator<T>::fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                 translator<T>::fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
                 T* constructed = make_call(t, std::index_sequence_for<Args...>{});
@@ -431,8 +513,9 @@ namespace NM::mrb {
             typedef Ret(T::*funcType)(Args...);
             typedef Ret(T::*constFuncType)(Args...) const;
             
+            
             template<funcType func>
-            struct binder {
+            struct binder{
                 static void bind(mrb_state *mrb, std::string name) {
                     mrb_func_t f = &method;
                     mrb_define_method(mrb,
@@ -442,7 +525,7 @@ namespace NM::mrb {
             private:
                 static mrb_value method(mrb_state *mrb, mrb_value self) {
                     std::string format = param_format_string<Args...>::value;
-                    std::tuple<mrb_conversion_helper<Args>...> t;
+                    std::tuple<conversion_helper<Args>...> t;
                     fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                     fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
                     void *p =mrb_data_check_get_ptr(mrb, self, data_type<T>::value());
@@ -468,8 +551,7 @@ namespace NM::mrb {
             private:
                 static mrb_value method(mrb_state *mrb, mrb_value self) {
                     std::string format = param_format_string<Args...>::value;
-                    std::cout << std::endl << format << std::endl;
-                    std::tuple<mrb_conversion_helper<Args>...> t;
+                    std::tuple<conversion_helper<Args>...> t;
                     fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                     fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
                     void *p =mrb_data_get_ptr(mrb, self, data_type<T>::value());
@@ -492,7 +574,8 @@ namespace NM::mrb {
         
     protected:
         /**
-         Given a tuple of mrb_conversion_helpers, sets each one of their s members to the current mrb_state
+         Given a tuple of mrb_conversion_helpers, sets each one of their mrb members to the current mrb_state.
+         We need this to do some value conversions.
          
          Uses that same nasty static paramater pack shit the other things use
          */
