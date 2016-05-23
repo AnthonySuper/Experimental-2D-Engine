@@ -540,12 +540,12 @@ namespace NM::mrb {
 
         template<typename Ret, typename ...Args>
         struct method {
-            typedef Ret(T::*funcType)(Args...);
-            typedef Ret(T::*constFuncType)(Args...) const;
+        private:
+            using funcType = Ret(T::*)(Args...);
+            using constFuncType = Ret(T::*)(Args...) const;
 
-
-            template<funcType func>
-            struct binder{
+            template<typename FT, FT func>
+            struct binder_helper {
                 static void bind(mrb_state *mrb, std::string name) {
                     mrb_func_t f = &method;
                     mrb_define_method(mrb,
@@ -558,48 +558,24 @@ namespace NM::mrb {
                     std::tuple<conversion_helper<Args>...> t;
                     fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                     fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
-                    void *p =mrb_data_check_get_ptr(mrb, self, data_type<T>::value);
+                    void *p = mrb_data_get_ptr(mrb, self, data_type<T>::value);
                     T *s = reinterpret_cast<T*>(p);
                     Ret re = make_call(s, func, t, std::index_sequence_for<Args...>{});
                     return to_value(mrb, re);
                 }
 
                 template<class Tuple, std::size_t... indexes>
-                static Ret make_call(T *self, funcType f, Tuple &t, std::index_sequence<indexes...>) {
+                static Ret make_call(T *self, FT f, Tuple &t, std::index_sequence<indexes...>) {
                     return (self->*f)(std::get<indexes>(t)...);
                 }
             };
+
+        public:
+            template<funcType func>
+            using binder = binder_helper<funcType, func>;
 
             template<constFuncType func>
-            struct const_binder {
-                static void bind(mrb_state *mrb, std::string name) {
-                    mrb_func_t f = &method;
-                    mrb_define_method(mrb,
-                                      getClass(mrb), name.c_str(), f, sizeof...(Args));
-                }
-
-            private:
-                static mrb_value method(mrb_state *mrb, mrb_value self) {
-                    std::string format = param_format_string_v<Args...>;
-                    std::tuple<conversion_helper<Args>...> t;
-                    fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
-                    fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
-                    void *p =mrb_data_get_ptr(mrb, self, data_type<T>::value);
-                    T *s = reinterpret_cast<T*>(p);
-                    Ret re = make_call(s, func, t, std::index_sequence_for<Args...>{});
-                    return to_value(mrb, re);
-                }
-
-                /**
-                 Use parameter pack expansion and an index sequence paramater to call the function
-                 */
-                template<class Tuple, std::size_t... indexes>
-                static Ret make_call(T *self, constFuncType f, Tuple &t, std::index_sequence<indexes...>) {
-                    return (self->*f)(std::get<indexes>(t)...);
-                }
-
-            };
-
+            using const_binder = binder_helper<constFuncType, func>;
         };
 
     protected:
