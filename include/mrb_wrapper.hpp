@@ -134,14 +134,12 @@ namespace NM::mrb {
      @brief get the mrb_data-type struct used to share this type with mruby
      @see NM::mrb::traits::is_shared_native<T>
      */
-    template<typename T>
+    template<typename T, typename rt = std::remove_reference_t<std::remove_pointer_t<T>>>
     struct data_type {
-        static const mrb_data_type* value() {
-            using rt = typename std::remove_reference<typename std::remove_pointer<T>::type>::type;
-            static_assert(traits::is_shared_native_v<rt>,
-                          "Can't get an MRB data type for a non-MRB object");
-            return &(std::remove_reference<rt>::type::mrb_type);
-        }
+        static_assert(traits::is_shared_native_v<rt>,
+                      "Can't get an MRB data type for a non-MRB object");
+
+        constexpr static const mrb_data_type* value = &(rt::mrb_type);
     };
 
 
@@ -173,7 +171,7 @@ namespace NM::mrb {
      */
     template<typename T>
     typename std::enable_if<traits::is_shared_native_v<T> && std::is_copy_constructible<T>::value, mrb_value>::type to_value(mrb_state *mrb, T obj) {
-        const mrb_data_type *type = data_type<T>::value();
+        const mrb_data_type *type = data_type<T>::value;
         struct RClass* klass = mrb_class_get(mrb, type->struct_name);
         // We create a copy here
         T *n = new T(obj);
@@ -184,7 +182,7 @@ namespace NM::mrb {
     typename std::enable_if<traits::is_shared_native_v<typename std::remove_pointer<T>::type> &&
     std::is_pointer<T>::value, mrb_value>::type to_value
     (mrb_state *mrb, T obj) {
-        const mrb_data_type *type = data_type<typename std::remove_pointer<T>::type>::value();
+        const mrb_data_type *type = data_type<typename std::remove_pointer<T>::type>::value;
         struct RClass *klass = mrb_class_get(mrb, type->struct_name);
         return mrb_obj_value(Data_Wrap_Struct(mrb, klass, type, obj));
     }
@@ -263,7 +261,7 @@ namespace NM::mrb {
 
     template<typename T>
     typename std::enable_if<traits::is_shared_native_v<typename std::remove_reference<typename std::remove_pointer<T>::type>::type>>::type conversion_check(mrb_state *mrb, mrb_value val) {
-        auto type = data_type<T>::value();
+        auto type = data_type<T>::value;
 
         if(mrb_type(val) != MRB_TT_DATA) {
             auto q = std::string{"Expected a native type, recieved "} + data_type_string(val);
@@ -284,7 +282,7 @@ namespace NM::mrb {
     typename std::enable_if<std::is_pointer<T>::value &&
     traits::is_shared_native_v<typename std::remove_pointer<T>::type>, T>::type
     from_value(mrb_state *mrb, mrb_value val) {
-        const mrb_data_type *type = data_type<T>::value();
+        const mrb_data_type *type = data_type<T>::value;
         conversion_check<T>(mrb, val);
         void *ptr = mrb_data_check_get_ptr(mrb, val, type);
         return static_cast<T>(ptr);
@@ -294,7 +292,7 @@ namespace NM::mrb {
     typename std::enable_if<(! std::is_pointer<T>::value) &&
     traits::is_shared_native_v<T>, T>::type from_value(mrb_state *mrb, mrb_value val) {
         using ptr = typename std::add_pointer<typename std::remove_reference<T>::type>::type;
-        const mrb_data_type *type = data_type<T>::value();
+        const mrb_data_type *type = data_type<T>::value;
         conversion_check<T>(mrb, val);
         // copy construct a new value
         void *p = mrb_data_get_ptr(mrb, val, type);
@@ -434,7 +432,7 @@ namespace NM::mrb {
         operator T() {
             // mruby's mrb_data_check_get_ptr function does not raise on error, it simply returns NULL.
             // We want it to throw an exception, which mrb_data_get_ptr does.
-            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_reference<T>::type>::value());
+            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_reference<T>::type>::value);
             contained_type *t = static_cast<contained_type*>(ptr);
             return *t;
         }
@@ -452,7 +450,7 @@ namespace NM::mrb {
         mrb_state *mrb;
 
         operator T() {
-            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_pointer<T>::type>::value());
+            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_pointer<T>::type>::value);
             return static_cast<T>(ptr);
         }
 
@@ -509,11 +507,11 @@ namespace NM::mrb {
                       "can only translate shared native values");
 
         static void makeClass(mrb_state *mrb) {
-            mrb_define_class(mrb, data_type<T>::value()->struct_name, mrb->object_class);
+            mrb_define_class(mrb, data_type<T>::value->struct_name, mrb->object_class);
         }
 
         static struct RClass* getClass(mrb_state *mrb) {
-            return mrb_class_get(mrb, data_type<T>::value()->struct_name);
+            return mrb_class_get(mrb, data_type<T>::value->struct_name);
         }
 
         template<typename ...Args>
@@ -531,7 +529,7 @@ namespace NM::mrb {
                 translator<T>::fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                 translator<T>::fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
                 T* constructed = make_call(t, std::index_sequence_for<Args...>{});
-                return mrb_obj_value(Data_Wrap_Struct(mrb, getClass(mrb), data_type<T>::value(), (void *) constructed));
+                return mrb_obj_value(Data_Wrap_Struct(mrb, getClass(mrb), data_type<T>::value, (void *) constructed));
             }
 
             template<class Tuple, std::size_t... indexes>
@@ -560,7 +558,7 @@ namespace NM::mrb {
                     std::tuple<conversion_helper<Args>...> t;
                     fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                     fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
-                    void *p =mrb_data_check_get_ptr(mrb, self, data_type<T>::value());
+                    void *p =mrb_data_check_get_ptr(mrb, self, data_type<T>::value);
                     T *s = reinterpret_cast<T*>(p);
                     Ret re = make_call(s, func, t, std::index_sequence_for<Args...>{});
                     return to_value(mrb, re);
@@ -586,7 +584,7 @@ namespace NM::mrb {
                     std::tuple<conversion_helper<Args>...> t;
                     fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                     fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
-                    void *p =mrb_data_get_ptr(mrb, self, data_type<T>::value());
+                    void *p =mrb_data_get_ptr(mrb, self, data_type<T>::value);
                     T *s = reinterpret_cast<T*>(p);
                     Ret re = make_call(s, func, t, std::index_sequence_for<Args...>{});
                     return to_value(mrb, re);
