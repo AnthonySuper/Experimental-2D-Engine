@@ -25,6 +25,8 @@
  */
 namespace NM::mrb {
 
+    #define autobinder(func) binder<decltype(func), &func>
+    
     /**
      @breif Exception for a bad conversion between an mrb type and a native type
      */
@@ -576,6 +578,7 @@ namespace NM::mrb {
 
             template<constFuncType func>
             using const_binder = binder_helper<constFuncType, func>;
+            
         };
 
     protected:

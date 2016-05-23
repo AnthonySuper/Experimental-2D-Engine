@@ -19,6 +19,7 @@ namespace NM {
         using doubleVec = t::method<double, const Vector&>;
         doubleVec::const_binder<&Vector::absoluteDistance>::bind(mrb, "absolute_distance");
         doubleVec::const_binder<&Vector::dotProduct>::bind(mrb, "dot");
+        
     }
     
     
