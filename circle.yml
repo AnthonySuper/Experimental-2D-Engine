@@ -7,7 +7,7 @@ dependencies:
 
 checkout:
   pre:
-    mkdir build
+    - mkdir build
   post:
     - git submodule sync
     - git submodule update --init
