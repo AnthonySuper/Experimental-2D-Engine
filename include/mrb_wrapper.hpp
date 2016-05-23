@@ -65,6 +65,12 @@ namespace NM::mrb {
             constexpr static bool value = std::is_same_v<const struct mrb_data_type, T>;
         };
 
+        /**
+         @brief Helper variable template for is_data_type_struct.
+         */
+        template<typename T>
+        constexpr bool is_data_type_struct_v = is_data_type_struct<T>::value;
+
 
         /**
          @brief determine if a user-defined object can be shared with MRB
@@ -90,7 +96,7 @@ namespace NM::mrb {
          */
         template<typename T>
         struct is_shared_native <T,
-        typename std::enable_if_t<is_data_type_struct<decltype(T::mrb_type)>::value>> {
+        typename std::enable_if_t<is_data_type_struct_v<decltype(T::mrb_type)>>> {
             constexpr static bool value = true;
         };
         /**
@@ -98,12 +104,18 @@ namespace NM::mrb {
          */
 
         /**
+         @brief Helper variable template for is_shared_native.
+         */
+        template<typename T>
+        constexpr bool is_shared_native_v = is_shared_native<T>::value;
+
+        /**
          Type trait which determines if this is any type we can share with MRB, including primitive types
          such as mrb_float, mrb_bool, and so on.
          */
         template<typename T>
         struct is_convertable {
-            constexpr static bool value = (is_shared_native<T>::value
+            constexpr static bool value = (is_shared_native_v<T>
                                            || std::is_integral_v<T>
                                            || std::is_same_v<bool, T>
                                            || std::is_floating_point_v<T>
@@ -111,7 +123,11 @@ namespace NM::mrb {
                                            || std::is_same_v<const char*, T>);
         };
 
-
+        /**
+         @brief Helper variable template for is_convertable.
+         */
+        template<typename T>
+        constexpr bool is_convertable_v = is_convertable<T>::value;
     }
 
     /**
@@ -122,7 +138,7 @@ namespace NM::mrb {
     struct data_type {
         static const mrb_data_type* value() {
             using rt = typename std::remove_reference_t<typename std::remove_pointer_t<T>>;
-            static_assert(traits::is_shared_native<rt>::value,
+            static_assert(traits::is_shared_native_v<rt>,
                           "Can't get an MRB data type for a non-MRB object");
             return &(std::remove_reference_t<rt>::mrb_type);
         }
@@ -155,7 +171,7 @@ namespace NM::mrb {
      That is going to change soon, hopefulyl!
      */
     template<typename T>
-    typename std::enable_if_t<traits::is_shared_native<T>::value && std::is_copy_constructible_v<T>, mrb_value> to_value(mrb_state *mrb, T obj) {
+    typename std::enable_if_t<traits::is_shared_native_v<T> && std::is_copy_constructible_v<T>, mrb_value> to_value(mrb_state *mrb, T obj) {
         const mrb_data_type *type = data_type<T>::value();
         struct RClass* klass = mrb_class_get(mrb, type->struct_name);
         // We create a copy here
@@ -164,7 +180,7 @@ namespace NM::mrb {
     }
 
     template<typename T>
-    typename std::enable_if_t<traits::is_shared_native<typename std::remove_pointer_t<T>>::value &&
+    typename std::enable_if_t<traits::is_shared_native_v<typename std::remove_pointer_t<T>> &&
     std::is_pointer_v<T>, mrb_value> to_value
     (mrb_state *mrb, T obj) {
         const mrb_data_type *type = data_type<typename std::remove_pointer_t<T>>::value();
@@ -232,7 +248,7 @@ namespace NM::mrb {
     }
 
     template<typename T>
-    typename std::enable_if_t<traits::is_shared_native<typename std::remove_reference_t<typename std::remove_pointer_t<T>>>::value> conversion_check(mrb_state *mrb, mrb_value val) {
+    typename std::enable_if_t<traits::is_shared_native_v<typename std::remove_reference_t<typename std::remove_pointer_t<T>>>> conversion_check(mrb_state *mrb, mrb_value val) {
         auto type = data_type<T>::value();
 
         if(mrb_type(val) != MRB_TT_DATA) {
@@ -252,7 +268,7 @@ namespace NM::mrb {
 
     template<typename T>
     typename std::enable_if_t<std::is_pointer_v<T> &&
-    traits::is_shared_native<typename std::remove_pointer_t<T>>::value, T>
+    traits::is_shared_native_v<typename std::remove_pointer_t<T>>, T>
     from_value(mrb_state *mrb, mrb_value val) {
         const mrb_data_type *type = data_type<T>::value();
         conversion_check<T>(mrb, val);
@@ -262,7 +278,7 @@ namespace NM::mrb {
 
     template<typename T>
     typename std::enable_if_t<! std::is_pointer_v<T> &&
-    traits::is_shared_native<T>::value, T> from_value(mrb_state *mrb, mrb_value val) {
+    traits::is_shared_native_v<T>, T> from_value(mrb_state *mrb, mrb_value val) {
         using ptr = typename std::add_pointer_t<typename std::remove_reference_t<T>>;
         const mrb_data_type *type = data_type<T>::value();
         conversion_check<T>(mrb, val);
@@ -291,7 +307,7 @@ namespace NM::mrb {
 
     // o is for object
     template<typename T>
-    struct param_char<T, typename std::enable_if_t<traits::is_shared_native<T>::value>> {
+    struct param_char<T, typename std::enable_if_t<traits::is_shared_native_v<T>>> {
         constexpr static const auto value = 'o';
     };
 
@@ -391,7 +407,7 @@ namespace NM::mrb {
      */
     template<typename T>
     struct conversion_helper<T,
-    typename std::enable_if_t<traits::is_shared_native<typename std::remove_reference_t<T>>::value>> {
+    typename std::enable_if_t<traits::is_shared_native_v<typename std::remove_reference_t<T>>>> {
 
         typedef typename std::remove_reference_t<T> contained_type;
 
@@ -413,7 +429,7 @@ namespace NM::mrb {
 
     template<typename T>
     struct conversion_helper<T,
-    typename std::enable_if_t< traits::is_shared_native<typename std::remove_pointer_t<T>>::value
+    typename std::enable_if_t< traits::is_shared_native_v<typename std::remove_pointer_t<T>>
     && std::is_pointer_v<T>>> {
         mrb_value v;
         mrb_state *mrb;
@@ -472,7 +488,7 @@ namespace NM::mrb {
      */
     template<typename T>
     struct translator {
-        static_assert(traits::is_shared_native<T>::value,
+        static_assert(traits::is_shared_native_v<T>,
                       "can only translate shared native values");
 
         static void makeClass(mrb_state *mrb) {
