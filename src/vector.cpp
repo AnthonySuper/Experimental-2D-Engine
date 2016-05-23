@@ -1,4 +1,5 @@
 #include "vector.hpp"
+#include "mrb_wrapper.hpp"
 
 namespace NM {
     
