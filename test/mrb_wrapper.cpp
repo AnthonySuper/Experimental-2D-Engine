@@ -47,4 +47,14 @@ TEST_CASE("to_value", "[mrb_wrapper]") {
 		REQUIRE(data_type_string(v) == "fixnum");
 		REQUIRE(from_value<short>(mrb, v) == -123);
 	}
+
+	SECTION("bool") {
+		mrb_value v = to_value(mrb, true);
+		REQUIRE(data_type_string(v) == "bool");
+		REQUIRE(from_value<bool>(mrb, v) == true);
+
+		v = to_value(mrb, false);
+		REQUIRE(data_type_string(v) == "bool");
+		REQUIRE(from_value<bool>(mrb, v) == false);
+	}
 }

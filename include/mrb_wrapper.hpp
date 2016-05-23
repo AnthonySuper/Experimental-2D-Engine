@@ -248,6 +248,19 @@ namespace NM::mrb {
         }
     }
 
+    template<>
+    inline bool from_value<bool>(mrb_state *mrb, mrb_value val) {
+        switch (mrb_type(val)) {
+            case MRB_TT_TRUE:
+            case MRB_TT_FALSE:
+                return mrb_bool(val);
+
+            default:
+                auto q = std::string{"Expected a bool, received a "} + data_type_string(val);
+                throw BadValueConversion{q};
+        }
+    }
+
     template<typename T>
     typename std::enable_if_t<traits::is_shared_native_v<typename std::remove_reference_t<typename std::remove_pointer_t<T>>>> conversion_check(mrb_state *mrb, mrb_value val) {
         auto type = data_type<T>::value();
