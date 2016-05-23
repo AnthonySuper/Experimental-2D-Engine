@@ -1,0 +1,19 @@
+general:
+  build_dir: build
+
+dependencies:
+  pre:
+  - sudo apt-get update; sudo apt-get install cmake libsdl2-dev
+
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
+    - mkdir build
+
+test:
+  override:
+    - cmake ..
+    - make
+    - ./catch_test
+
