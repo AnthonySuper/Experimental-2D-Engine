@@ -233,7 +233,6 @@ namespace NM::mrb {
 
     template<typename T>
     typename std::enable_if<traits::is_shared_native<typename std::remove_reference<typename std::remove_pointer<T>::type>::type>::value>::type conversion_check(mrb_state *mrb, mrb_value val) {
-        using Ti = typename std::remove_reference<typename std::remove_pointer<T>::type>::type;
         auto type = data_type<T>::value();
 
         if(mrb_type(val) != MRB_TT_DATA) {
