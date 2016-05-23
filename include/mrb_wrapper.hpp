@@ -146,11 +146,12 @@ namespace NM::mrb {
 
 
     template<typename T>
-    inline typename std::enable_if_t<std::is_integral_v<T> && ! std::is_same_v<bool, T>, mrb_value> to_value(mrb_state *mrb, T i) {
+    inline typename std::enable_if_t<std::is_integral_v<T>, mrb_value> to_value(mrb_state *mrb, T i) {
         return mrb_fixnum_value(i);
     }
 
-    inline mrb_value to_value(mrb_state *mrb, bool b) {
+    template<>
+    inline mrb_value to_value<bool>(mrb_state *mrb, bool b) {
         return mrb_bool_value(b);
     }
 
@@ -319,13 +320,13 @@ namespace NM::mrb {
 
     // i is for integer
     template<typename T>
-    struct param_char<T, typename std::enable_if_t<std::is_integral_v<T> && ! std::is_same_v<bool, T>>> {
+    struct param_char<T, typename std::enable_if_t<std::is_integral_v<T>>> {
         constexpr static auto value = 'i';
     };
 
     // b is for bool
-    template<typename T>
-    struct param_char<T, typename std::enable_if_t<std::is_same_v<bool, T>>> {
+    template<>
+    struct param_char<bool> {
         constexpr static auto value = 'b';
     };
 
