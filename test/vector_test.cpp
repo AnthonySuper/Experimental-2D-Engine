@@ -1,6 +1,5 @@
 #include "catch.hpp"
 #include "vector.hpp"
-#include "mrb_wrapper.hpp"
 #include <mruby/compile.h>
 
 TEST_CASE("Vector constructs properly with arguments") {
