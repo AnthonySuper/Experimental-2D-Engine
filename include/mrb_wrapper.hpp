@@ -347,6 +347,9 @@ namespace NM::mrb {
     template<typename ...Args>
     const char param_format_string<Args...>::value[] = {(param_char<typename std::remove_reference_t<Args>>::value)..., '\0'};
 
+    template<typename ...Args>
+    constexpr auto param_format_string_v = param_format_string<Args...>::value;
+
     /**
      Defines a struct that assists in conversion of types from mruby types to C++ types.
      */
@@ -509,7 +512,7 @@ namespace NM::mrb {
 
         private:
             static mrb_value val(mrb_state *mrb, mrb_value self) {
-                std::string format = param_format_string<Args...>::value;
+                std::string format = param_format_string_v<Args...>;
                 std::tuple<conversion_helper<Args>...> t;
                 translator<T>::fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                 translator<T>::fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
@@ -539,7 +542,7 @@ namespace NM::mrb {
 
             private:
                 static mrb_value method(mrb_state *mrb, mrb_value self) {
-                    std::string format = param_format_string<Args...>::value;
+                    std::string format = param_format_string_v<Args...>;
                     std::tuple<conversion_helper<Args>...> t;
                     fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                     fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
@@ -565,7 +568,7 @@ namespace NM::mrb {
 
             private:
                 static mrb_value method(mrb_state *mrb, mrb_value self) {
-                    std::string format = param_format_string<Args...>::value;
+                    std::string format = param_format_string_v<Args...>;
                     std::tuple<conversion_helper<Args>...> t;
                     fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                     fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
