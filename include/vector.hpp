@@ -4,8 +4,7 @@
 #include <stdint.h>
 #include <cmath>
 #include <sstream>
-#include <mruby.h>
-#include <mruby/data.h>
+#include <mrb_wrapper.hpp>
 
 namespace NM {
     
