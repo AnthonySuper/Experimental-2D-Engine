@@ -182,7 +182,7 @@ namespace NM::mrb {
     typename std::enable_if_t<traits::is_shared_native_v<typename std::remove_pointer_t<T>> &&
     std::is_pointer_v<T>, mrb_value> to_value
     (mrb_state *mrb, T obj) {
-        const mrb_data_type *type = data_type<typename std::remove_pointer_t<T>>::value;
+        const mrb_data_type *type = data_type<T>::value;
         struct RClass *klass = mrb_class_get(mrb, type->struct_name);
         return mrb_obj_value(Data_Wrap_Struct(mrb, klass, type, obj));
     }
@@ -432,7 +432,7 @@ namespace NM::mrb {
         operator T() {
             // mruby's mrb_data_check_get_ptr function does not raise on error, it simply returns NULL.
             // We want it to throw an exception, which mrb_data_get_ptr does.
-            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_reference_t<T>>::value);
+            void *ptr = mrb_data_get_ptr(mrb, v, data_type<T>::value);
             contained_type *t = static_cast<contained_type*>(ptr);
             return *t;
         }
@@ -450,7 +450,7 @@ namespace NM::mrb {
         mrb_state *mrb;
 
         operator T() {
-            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_pointer_t<T>>::value);
+            void *ptr = mrb_data_get_ptr(mrb, v, data_type<T>::value);
             return static_cast<T>(ptr);
         }
 
