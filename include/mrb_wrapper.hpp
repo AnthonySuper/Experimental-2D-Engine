@@ -62,7 +62,7 @@ namespace NM::mrb {
          */
         template<typename T>
         struct is_data_type_struct {
-            constexpr static bool value = std::is_same<const struct mrb_data_type, T>::value;
+            constexpr static bool value = std::is_same_v<const struct mrb_data_type, T>;
         };
 
 
@@ -90,7 +90,7 @@ namespace NM::mrb {
          */
         template<typename T>
         struct is_shared_native <T,
-        typename std::enable_if<is_data_type_struct<decltype(T::mrb_type)>::value>::type> {
+        typename std::enable_if_t<is_data_type_struct<decltype(T::mrb_type)>::value>> {
             constexpr static bool value = true;
         };
         /**
@@ -104,11 +104,11 @@ namespace NM::mrb {
         template<typename T>
         struct is_convertable {
             constexpr static bool value = (is_shared_native<T>::value
-                                           || std::is_integral<T>::value
-                                           || std::is_same<bool, T>::value
-                                           || std::is_floating_point<T>::value
-                                           || std::is_same<std::string, T>::value
-                                           || std::is_same<const char*, T>::value);
+                                           || std::is_integral_v<T>
+                                           || std::is_same_v<bool, T>
+                                           || std::is_floating_point_v<T>
+                                           || std::is_same_v<std::string, T>
+                                           || std::is_same_v<const char*, T>);
         };
 
 
@@ -121,16 +121,16 @@ namespace NM::mrb {
     template<typename T>
     struct data_type {
         static const mrb_data_type* value() {
-            using rt = typename std::remove_reference<typename std::remove_pointer<T>::type>::type;
+            using rt = typename std::remove_reference_t<typename std::remove_pointer_t<T>>;
             static_assert(traits::is_shared_native<rt>::value,
                           "Can't get an MRB data type for a non-MRB object");
-            return &(std::remove_reference<rt>::type::mrb_type);
+            return &(std::remove_reference_t<rt>::mrb_type);
         }
     };
 
 
     template<typename T>
-    inline typename std::enable_if<std::is_integral<T>::value && ! std::is_same<bool, T>::value, mrb_value>::type to_value(mrb_state *mrb, T i) {
+    inline typename std::enable_if_t<std::is_integral_v<T> && ! std::is_same_v<bool, T>, mrb_value> to_value(mrb_state *mrb, T i) {
         return mrb_fixnum_value(i);
     }
 
@@ -140,7 +140,7 @@ namespace NM::mrb {
 
 
     template<typename T>
-    inline typename std::enable_if<std::is_floating_point<T>::value, mrb_value>::type to_value(mrb_state *mrb, T i) {
+    inline typename std::enable_if_t<std::is_floating_point_v<T>, mrb_value> to_value(mrb_state *mrb, T i) {
         return mrb_float_value(mrb, i);
     }
 
@@ -155,7 +155,7 @@ namespace NM::mrb {
      That is going to change soon, hopefulyl!
      */
     template<typename T>
-    typename std::enable_if<traits::is_shared_native<T>::value && std::is_copy_constructible<T>::value, mrb_value>::type to_value(mrb_state *mrb, T obj) {
+    typename std::enable_if_t<traits::is_shared_native<T>::value && std::is_copy_constructible_v<T>, mrb_value> to_value(mrb_state *mrb, T obj) {
         const mrb_data_type *type = data_type<T>::value();
         struct RClass* klass = mrb_class_get(mrb, type->struct_name);
         // We create a copy here
@@ -164,10 +164,10 @@ namespace NM::mrb {
     }
 
     template<typename T>
-    typename std::enable_if<traits::is_shared_native<typename std::remove_pointer<T>::type>::value &&
-    std::is_pointer<T>::value, mrb_value>::type to_value
+    typename std::enable_if_t<traits::is_shared_native<typename std::remove_pointer_t<T>>::value &&
+    std::is_pointer_v<T>, mrb_value> to_value
     (mrb_state *mrb, T obj) {
-        const mrb_data_type *type = data_type<typename std::remove_pointer<T>::type>::value();
+        const mrb_data_type *type = data_type<typename std::remove_pointer_t<T>>::value();
         struct RClass *klass = mrb_class_get(mrb, type->struct_name);
         return mrb_obj_value(Data_Wrap_Struct(mrb, klass, type, obj));
     }
@@ -202,7 +202,7 @@ namespace NM::mrb {
 
 
     template<typename T>
-    typename std::enable_if<std::is_integral<T>::value, T>::type from_value(mrb_state *mrb, mrb_value val) {
+    typename std::enable_if_t<std::is_integral_v<T>, T> from_value(mrb_state *mrb, mrb_value val) {
         switch(mrb_type(val)) {
             case MRB_TT_FIXNUM:
                 return (T) (mrb_float) mrb_fixnum(val);
@@ -217,7 +217,7 @@ namespace NM::mrb {
     }
 
     template<typename T>
-    typename std::enable_if<std::is_floating_point<T>::value, T>::type from_value(mrb_state *mrb, mrb_value val) {
+    typename std::enable_if_t<std::is_floating_point_v<T>, T> from_value(mrb_state *mrb, mrb_value val) {
         switch(mrb_type(val)) {
             case MRB_TT_FLOAT:
                 return (T) (mrb_int) (mrb_fixnum(val));
@@ -232,7 +232,7 @@ namespace NM::mrb {
     }
 
     template<typename T>
-    typename std::enable_if<traits::is_shared_native<typename std::remove_reference<typename std::remove_pointer<T>::type>::type>::value>::type conversion_check(mrb_state *mrb, mrb_value val) {
+    typename std::enable_if_t<traits::is_shared_native<typename std::remove_reference_t<typename std::remove_pointer_t<T>>>::value> conversion_check(mrb_state *mrb, mrb_value val) {
         auto type = data_type<T>::value();
 
         if(mrb_type(val) != MRB_TT_DATA) {
@@ -251,8 +251,8 @@ namespace NM::mrb {
 
 
     template<typename T>
-    typename std::enable_if<std::is_pointer<T>::value &&
-    traits::is_shared_native<typename std::remove_pointer<T>::type>::value, T>::type
+    typename std::enable_if_t<std::is_pointer_v<T> &&
+    traits::is_shared_native<typename std::remove_pointer_t<T>>::value, T>
     from_value(mrb_state *mrb, mrb_value val) {
         const mrb_data_type *type = data_type<T>::value();
         conversion_check<T>(mrb, val);
@@ -261,9 +261,9 @@ namespace NM::mrb {
     }
 
     template<typename T>
-    typename std::enable_if<(! std::is_pointer<T>::value) &&
-    traits::is_shared_native<T>::value, T>::type from_value(mrb_state *mrb, mrb_value val) {
-        using ptr = typename std::add_pointer<typename std::remove_reference<T>::type>::type;
+    typename std::enable_if_t<! std::is_pointer_v<T> &&
+    traits::is_shared_native<T>::value, T> from_value(mrb_state *mrb, mrb_value val) {
+        using ptr = typename std::add_pointer_t<typename std::remove_reference_t<T>>;
         const mrb_data_type *type = data_type<T>::value();
         conversion_check<T>(mrb, val);
         // copy construct a new value
@@ -291,25 +291,25 @@ namespace NM::mrb {
 
     // o is for object
     template<typename T>
-    struct param_char<T, typename std::enable_if<traits::is_shared_native<T>::value>::type> {
+    struct param_char<T, typename std::enable_if_t<traits::is_shared_native<T>::value>> {
         constexpr static const auto value = 'o';
     };
 
     // f is for float
     template<typename T>
-    struct param_char<T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
+    struct param_char<T, typename std::enable_if_t<std::is_floating_point_v<T>>> {
         constexpr static const auto value = 'f';
     };
 
     // i is for integer
     template<typename T>
-    struct param_char<T, typename std::enable_if<std::is_integral<T>::value && ! std::is_same<bool, T>::value>::type> {
+    struct param_char<T, typename std::enable_if_t<std::is_integral_v<T> && ! std::is_same_v<bool, T>>> {
         constexpr static auto value = 'i';
     };
 
     // b is for bool
     template<typename T>
-    struct param_char<T, typename std::enable_if<std::is_same<bool, T>::value>::type> {
+    struct param_char<T, typename std::enable_if_t<std::is_same_v<bool, T>>> {
         constexpr static auto value = 'b';
     };
 
@@ -329,7 +329,7 @@ namespace NM::mrb {
     };
 
     template<typename ...Args>
-    const char param_format_string<Args...>::value[] = {(param_char<typename std::remove_reference<Args>::type>::value)..., '\0'};
+    const char param_format_string<Args...>::value[] = {(param_char<typename std::remove_reference_t<Args>>::value)..., '\0'};
 
     /**
      Defines a struct that assists in conversion of types from mruby types to C++ types.
@@ -341,7 +341,7 @@ namespace NM::mrb {
 
     // Specialization for floating point types
     template<typename T>
-    struct conversion_helper<T, typename std::enable_if<std::is_floating_point<T>::value>::type> {
+    struct conversion_helper<T, typename std::enable_if_t<std::is_floating_point_v<T>>> {
         mrb_float d;
         mrb_state *mrb;
 
@@ -358,7 +358,7 @@ namespace NM::mrb {
     // Specialization for integral types
     template<typename T>
     struct conversion_helper<T,
-    typename std::enable_if<std::is_integral<T>::value>::type> {
+    typename std::enable_if_t<std::is_integral_v<T>>> {
         mrb_int i;
         mrb_state *mrb;
 
@@ -391,9 +391,9 @@ namespace NM::mrb {
      */
     template<typename T>
     struct conversion_helper<T,
-    typename std::enable_if<traits::is_shared_native<typename std::remove_reference<T>::type>::value>::type> {
+    typename std::enable_if_t<traits::is_shared_native<typename std::remove_reference_t<T>>::value>> {
 
-        typedef typename std::remove_reference<T>::type contained_type;
+        typedef typename std::remove_reference_t<T> contained_type;
 
         mrb_value v;
         mrb_state *mrb;
@@ -401,7 +401,7 @@ namespace NM::mrb {
         operator T() {
             // mruby's mrb_data_check_get_ptr function does not raise on error, it simply returns NULL.
             // We want it to throw an exception, which mrb_data_get_ptr does.
-            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_reference<T>::type>::value());
+            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_reference_t<T>>::value());
             contained_type *t = static_cast<contained_type*>(ptr);
             return *t;
         }
@@ -413,13 +413,13 @@ namespace NM::mrb {
 
     template<typename T>
     struct conversion_helper<T,
-    typename std::enable_if< traits::is_shared_native<typename std::remove_pointer<T>::type>::value
-    && std::is_pointer<T>::value>::type> {
+    typename std::enable_if_t< traits::is_shared_native<typename std::remove_pointer_t<T>>::value
+    && std::is_pointer_v<T>>> {
         mrb_value v;
         mrb_state *mrb;
 
         operator T() {
-            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_pointer<T>::type>::value());
+            void *ptr = mrb_data_get_ptr(mrb, v, data_type<typename std::remove_pointer_t<T>>::value());
             return static_cast<T>(ptr);
         }
 
