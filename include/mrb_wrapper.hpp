@@ -28,11 +28,11 @@ namespace NM::mrb {
     /**
      @breif Exception for a bad conversion between an mrb type and a native type
      */
-    class BadValueConersion : std::logic_error {
+    class BadValueConversion : std::logic_error {
     public:
 
-        BadValueConersion(std::string &arg) : std::logic_error(arg) {};
-        BadValueConersion(const char *w) : std::logic_error(w) {};
+        BadValueConversion(std::string &arg) : std::logic_error(arg) {};
+        BadValueConversion(const char *w) : std::logic_error(w) {};
     };
 
 
@@ -212,7 +212,7 @@ namespace NM::mrb {
                 break;
             default:
                 auto q = std::string{"Expected a fixnum/integer, recieved a "} + data_type_string(val);
-                throw BadValueConersion{q};
+                throw BadValueConversion{q};
         }
     }
 
@@ -227,7 +227,7 @@ namespace NM::mrb {
                 break;
             default:
                 auto q =std::string{"Expected a float, recieved a "} + data_type_string(val);
-                throw BadValueConersion("Value given was not a float");
+                throw BadValueConversion("Value given was not a float");
         }
     }
 
@@ -238,7 +238,7 @@ namespace NM::mrb {
 
         if(mrb_type(val) != MRB_TT_DATA) {
             auto q = std::string{"Expected a native type, recieved "} + data_type_string(val);
-            throw BadValueConersion{q};
+            throw BadValueConversion{q};
         }
 
         if(DATA_TYPE(val) != type) {
@@ -246,7 +246,7 @@ namespace NM::mrb {
             auto real_type = data_type_string(val);
             auto expected_type = std::string{DATA_TYPE(val)->struct_name};
             auto q = std::string{"Expected native type "} + expected_type + " got " + real_type;
-            throw BadValueConersion{q};
+            throw BadValueConversion{q};
         }
     }
 
