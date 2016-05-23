@@ -49,15 +49,16 @@ target_link_libraries(app ${SDL2_LIBRARY})
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE "lib/")
 
-add_executable(catch_test test/main.cpp 
+add_executable(catch_test test/main.cpp
   ${PROJECT_SRCS}
   test/test_util.cpp
   test/vector_test.cpp
-  test/polygon_test.cpp)
+  test/polygon_test.cpp
+  test/mrb_wrapper.cpp)
 
 
 target_link_libraries(catch_test Catch)
-target_linK_libraries(catch_test 
+target_linK_libraries(catch_test
   ${CMAKE_SOURCE_DIR}/mruby/build/host/lib/libmruby.a)
 
 add_test(NAME CatchTests COMMAND catch_test)
