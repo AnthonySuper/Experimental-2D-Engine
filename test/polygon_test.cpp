@@ -28,7 +28,7 @@ TEST_CASE("Collisions with squares"){
 TEST_CASE("Centroids") {
     SECTION("With squares") {
         NM::Polygon square{{0,0}, {0, 4}, {4,4}, {4,0}};
-        REQUIRE(NM::Point(2,2) == square.getCentroid());
+        REQUIRE(NM::Vector(2,2) == square.getCentroid());
     }
     
     SECTION("With triangles") {

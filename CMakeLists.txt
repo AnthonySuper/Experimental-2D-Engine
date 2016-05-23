@@ -12,6 +12,7 @@ set(PROJECT_SRCS
 
 set(PROJECT_INCLUDES
   include/util.hpp
+  include/scene.hpp
   include/vector.hpp
   include/polygon.hpp
   include/collision_result.hpp

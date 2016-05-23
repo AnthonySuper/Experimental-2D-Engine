@@ -6,9 +6,10 @@
 #include "collision_result.hpp"
 
 namespace NM {
-    typedef Vector Point;
+    
     
     class Polygon {
+        using Point = Vector;
     public:
         Polygon(std::initializer_list<Point>);
         

@@ -18,7 +18,7 @@ namespace NM {
      Y increases as you move downwards on the grid, and X increases as you move right.
      This is a vertical flip of the typical coordinate system, mostly because SDL uses the same thing.
      */
-    class Vector {
+    class Vector final {
         
         
     public:
