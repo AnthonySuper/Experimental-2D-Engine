@@ -6,7 +6,7 @@ sudo: false
 
 before_install:
     - brew update
-    - brew install boost sdl2
+    - brew install boost sdl2 sdl2_image sdl2_ttf
 
 script:
     - (cd mruby && make -j2)
