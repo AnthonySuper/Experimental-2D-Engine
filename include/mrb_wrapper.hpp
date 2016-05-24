@@ -5,14 +5,17 @@
 //  Created by Anthony Super on 5/16/16.
 
 
+#pragma once
 #ifndef mrb_wrapper_h
 #define mrb_wrapper_h
-#pragma once
 
 #include <mruby.h>
 #include <mruby/data.h>
-#include <type_traits>
 #include <iostream>
+#include <stdexcept>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 /**
@@ -23,7 +26,7 @@
  The important thing here is to remain calm. Put on some relaxing music.
  I know I had to when writing this stuff.
  */
-namespace NM::mrb {
+namespace NM { namespace mrb {
 
     #define autobinder(func) binder<decltype(func), &func>
     
@@ -609,6 +612,6 @@ namespace NM::mrb {
         }
     };
 
-}
+} } /* end namespace */
 
 #endif /* mrb_wrapper_h */

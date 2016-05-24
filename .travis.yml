@@ -1,17 +1,40 @@
 language: cpp
-os: osx
-osx_image: xcode7.3
-compiler: clang
-sudo: false
+sudo: required
+dist: trusty
 
-before_install:
-    - brew update
-    - brew install boost sdl2 sdl2_image sdl2_ttf
+matrix:
+  include:
+    - os: linux
+      compiler: g++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libsdl2-dev
+            - libsdl2-image-dev
+            - libsdl2-ttf-dev
+            - g++-5
+      env: COMPILER=g++-5
 
-script:
-    - (cd mruby && make -j2)
-    - mkdir build
-    - cd build
-    - cmake -G Xcode ..
-    - xcodebuild
-    - Debug/catch_test
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - libsdl2-dev
+            - libsdl2-image-dev
+            - libsdl2-ttf-dev
+            - clang-3.6
+      env: COMPILER=clang++-3.6
+
+    - os: osx
+      osx_image: xcode7.3
+      before_install:
+        - brew update
+        - brew install sdl2 sdl2_image sdl2_ttf
+
+script: ./build.sh

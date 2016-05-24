@@ -1,5 +1,7 @@
 #include "polygon.hpp"
 #include <iostream>
+#include <limits>
+#include <tuple>
 
 namespace NM {
     Polygon::Polygon(std::initializer_list<Point> _points) {
@@ -93,7 +95,7 @@ namespace NM {
             min = std::min(min, r);
             max = std::max(max, r);
         }
-        return {min, max};
+        return std::make_tuple(min, max);
     }
-    
+
 }

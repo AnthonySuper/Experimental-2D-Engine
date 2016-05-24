@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 2.8.0)
 
 project(nmtt)
 
@@ -23,11 +23,6 @@ add_executable(app app.cpp ${PROJECT_SRCS} ${PROJECT_INCLUDES})
 target_link_libraries(app
   ${CMAKE_SOURCE_DIR}/mruby/build/host/lib/libmruby.a)
 
-set(Boost_USE_STATIC_LIBS OFF)
-
-set(Boost_USE_MULTITHREADED ON)
-
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -44,8 +39,8 @@ include_directories(${SDL2_INCLUDE_DIR}
   "include/"
   "mruby/include/")
 
-target_link_libraries(app 
-  ${SDL2_LIBRARY} 
+target_link_libraries(app
+  ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARY}
   ${SDL2TTF_LIBRARY})
 
