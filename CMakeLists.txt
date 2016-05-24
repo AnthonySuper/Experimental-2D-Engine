@@ -30,21 +30,24 @@ set(Boost_USE_MULTITHREADED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall")
 
-find_package(Boost 1.60 REQUIRED COMPONENTS system regex)
-
-include_directories(app ${Boost_INCLUDE_DIRS})
-
-target_link_libraries(app ${Boost_LIBRARIES})
-
-
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
+
 find_package(SDL2 REQUIRED)
+find_package(SDL2TTF REQUIRED)
+find_package(SDL2_image REQUIRED >= 2.0.0)
+
+
 include_directories(${SDL2_INCLUDE_DIR}
+  ${SDL2TTF_INCLUDE_DIR}
+  ${SDL2_IMAGE_INCLUDE_DIR}
   "include/"
   "mruby/include/")
 
-target_link_libraries(app ${SDL2_LIBRARY})
+target_link_libraries(app 
+  ${SDL2_LIBRARY} 
+  ${SDL2_IMAGE_LIBRARY}
+  ${SDL2TTF_LIBRARY})
 
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE "lib/")
