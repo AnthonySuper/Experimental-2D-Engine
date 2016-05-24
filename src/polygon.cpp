@@ -1,5 +1,7 @@
 #include "polygon.hpp"
 #include <iostream>
+#include <limits>
+#include <tuple>
 
 namespace NM {
     Polygon::Polygon(std::initializer_list<Point> _points) {

@@ -5,14 +5,17 @@
 //  Created by Anthony Super on 5/16/16.
 
 
+#pragma once
 #ifndef mrb_wrapper_h
 #define mrb_wrapper_h
-#pragma once
 
 #include <mruby.h>
 #include <mruby/data.h>
-#include <type_traits>
 #include <iostream>
+#include <stdexcept>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 /**
