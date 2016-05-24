@@ -26,7 +26,7 @@
  The important thing here is to remain calm. Put on some relaxing music.
  I know I had to when writing this stuff.
  */
-namespace NM::mrb {
+namespace NM { namespace mrb {
 
     #define autobinder(func) binder<decltype(func), &func>
     
@@ -612,6 +612,6 @@ namespace NM::mrb {
         }
     };
 
-}
+} } /* end namespace */
 
 #endif /* mrb_wrapper_h */

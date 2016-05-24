@@ -95,7 +95,7 @@ namespace NM {
             min = std::min(min, r);
             max = std::max(max, r);
         }
-        return {min, max};
+        return std::make_tuple(min, max);
     }
-    
+
 }
