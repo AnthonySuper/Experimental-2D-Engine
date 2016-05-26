@@ -3,7 +3,7 @@
 #include "vector.hpp"
 #include <initializer_list>
 #include <vector>
-#include <sdl.h>
+#include <SDL.h>
 #include "collision_result.hpp"
 
 namespace NM {
