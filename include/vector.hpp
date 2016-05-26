@@ -6,6 +6,7 @@
 #include <sstream>
 #include <mruby.h>
 #include <mruby/data.h>
+#include <SDL.h>
 
 namespace NM {
     
@@ -108,6 +109,14 @@ namespace NM {
          as this vector. Useful for all kinds of linear algebra-ey things.
          */
         Vector unitVector() const;
+        
+        
+        operator SDL_Point() const {
+            return {
+            .x = static_cast<int>(x),
+            .y =  static_cast<int>(y)
+            };
+        }
         
     private:
         

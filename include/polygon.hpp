@@ -1,8 +1,9 @@
 #ifndef _POLYGON_HPP
 #define _POLYGON_HPP
 #include "vector.hpp"
-#include <vector>
 #include <initializer_list>
+#include <vector>
+#include <sdl.h>
 #include "collision_result.hpp"
 
 namespace NM {
@@ -27,6 +28,10 @@ namespace NM {
         
         const Point& getCentroid() const {
             return centroid;
+        }
+        
+        const std::vector<Point>& getPoints() const {
+            return points;
         }
         
     protected:
