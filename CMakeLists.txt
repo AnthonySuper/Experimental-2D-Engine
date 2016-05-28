@@ -6,7 +6,6 @@ enable_testing()
 
 set(PROJECT_SRCS
   src/util.cpp
-  src/renderable.cpp
   src/script_engine.cpp
   src/vector.cpp
   src/polygon.cpp
