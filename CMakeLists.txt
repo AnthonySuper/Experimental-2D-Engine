@@ -6,12 +6,15 @@ enable_testing()
 
 set(PROJECT_SRCS
   src/util.cpp
+  src/renderable.cpp
   src/script_engine.cpp
   src/vector.cpp
   src/polygon.cpp
+  src/scene.cpp
   src/collision_result.cpp)
 
 set(PROJECT_INCLUDES
+  include/scene.hpp
   include/script_engine.hpp
   include/util.hpp
   include/vector.hpp
