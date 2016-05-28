@@ -6,15 +6,17 @@ enable_testing()
 
 set(PROJECT_SRCS
   src/util.cpp
+  src/script_engine.cpp
   src/vector.cpp
   src/polygon.cpp
   src/collision_result.cpp)
 
 set(PROJECT_INCLUDES
+  include/script_engine.hpp
   include/util.hpp
-  include/scene.hpp
   include/vector.hpp
   include/polygon.hpp
+  include/errors.hpp
   include/collision_result.hpp
   include/mrb_wrapper.hpp)
 

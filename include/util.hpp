@@ -7,8 +7,6 @@ namespace NM {
     namespace Util {
         long factorial(long);
     }
-    
-    typedef std::bitset<256> PlayerBitmask;
 }
 
 

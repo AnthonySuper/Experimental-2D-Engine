@@ -12,7 +12,7 @@ namespace NM {
         t::constructor<double, double>::bind(mrb);
         using doubleRet = t::method<double>;
         doubleRet::const_binder<&Vector::getX>::bind(mrb, "x");
-        doubleRet::const_binder<&Vector::getY>::bind(mrb, "x");
+        doubleRet::const_binder<&Vector::getY>::bind(mrb, "y");
         using setters = t::method<double, double>;
         setters::binder<&Vector::setX>::bind(mrb, "x=");
         setters::binder<&Vector::setY>::bind(mrb, "y=");
