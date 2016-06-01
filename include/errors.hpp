@@ -3,6 +3,9 @@
 
 #include <stdexcept>
 
+// File containing generalized error subclasses, used in multiple places.
+
+
 namespace NM {
     class FileNotFoundError : std::runtime_error {
         

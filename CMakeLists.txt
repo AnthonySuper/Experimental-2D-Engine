@@ -6,6 +6,8 @@ enable_testing()
 
 set(PROJECT_SRCS
   src/util.cpp
+  src/window.cpp
+  src/actor.cpp
   src/script_engine.cpp
   src/vector.cpp
   src/polygon.cpp
@@ -13,6 +15,8 @@ set(PROJECT_SRCS
   src/collision_result.cpp)
 
 set(PROJECT_INCLUDES
+  include/actor.hpp
+  include/window.hpp
   include/scene.hpp
   include/script_engine.hpp
   include/util.hpp
