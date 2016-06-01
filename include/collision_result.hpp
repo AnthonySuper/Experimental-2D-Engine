@@ -5,6 +5,12 @@
 #include <sstream>
 
 namespace NM {
+    /**
+     Model the result of some collision, including if the collision was successful.
+     
+     @remarks This class has a user-defined conversion to bool, so you may check if the collision
+     was successful simply by using `if(collision);`
+     */
     class CollisionResult {
     public:
         
