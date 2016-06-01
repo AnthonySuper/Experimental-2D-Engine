@@ -64,7 +64,13 @@ add_executable(catch_test test/main.cpp
 
 
 target_link_libraries(catch_test Catch)
-target_linK_libraries(catch_test
+target_link_libraries(catch_test
   ${CMAKE_SOURCE_DIR}/mruby/build/host/lib/libmruby.a)
+
+target_link_libraries(catch_test
+  ${SDL2_IMAGE_LIBRARY}
+  ${SDL2_LIBRARY}
+  ${SDL2TTF_LIBRARY})
+
 
 add_test(NAME CatchTests COMMAND catch_test)
