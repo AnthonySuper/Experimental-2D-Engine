@@ -3,6 +3,9 @@
 #include <SDL.h>
 #include <stdexcept>
 #include <memory>
+#include <vector>
+#include <actor.hpp>
+#include "script_engine.hpp"
 #include "window.hpp"
 
 namespace NM {
@@ -14,11 +17,17 @@ namespace NM {
             std::runtime_error(std::string("Render creation failed") + SDL_GetError()) {}
         };
         
-        Scene(std::shared_ptr<Window> window);
+        Scene(Window *w);
+        
+        void addActor(std::string behavior_class_name);
         
     private:
-        const std::shared_ptr<Window> window;
+        std::vector<Actor> actors;
+        
+        Window* const window;
+        
         SDL_Renderer *render;
     };
 }
+
 #endif

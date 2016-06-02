@@ -4,6 +4,7 @@
 #include <tuple>
 
 namespace NM {
+    
     Polygon::Polygon(std::initializer_list<Point> _points) {
         points = std::vector<Point>(_points);
         calcCentroid();

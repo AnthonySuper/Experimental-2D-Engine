@@ -5,6 +5,7 @@
 #include <mruby/compile.h>
 #include "errors.hpp"
 #include <stdio.h>
+#include <memory>
 
 
 namespace NM {
@@ -12,6 +13,7 @@ namespace NM {
         
     public:
         ScriptEngine();
+        
          mrb_state* getMRB();
         
         /**
@@ -26,7 +28,7 @@ namespace NM {
         mrb_value loadPath(std::string path);
         
     private:
-        mrb_state *mrb;
+        std::shared_ptr<mrb_state> mrb;
     };
 }
 #endif

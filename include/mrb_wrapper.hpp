@@ -57,6 +57,17 @@ namespace NM { namespace mrb {
         T* type = reinterpret_cast<T*>(self);
         delete type;
     }
+    
+    /**
+     @brief define a destructor which does nothing
+     
+     Used in situations where we don't want mruby to manage our memory for
+     a given class. At some point we should use GC proection instead, but the
+     mruby documentation on that is really bad, so we use this hack for now.
+     */
+    void destructor_noop(mrb_state *mrb, void *self) {
+        // Do nothing
+    }
 
     /**
      @brief type traits relating to shared data between C++ and Mruby

@@ -5,13 +5,12 @@
 #include <stdexcept>
 #include <string>
 #include <SDL.h>
+#include "script_engine.hpp"
 
 namespace NM {
     /**
      Class representing a game window.
      
-     Most often you will wish to heap allocate this into a shared pointer via make_shared,
-     as this class is most often used via a shared_ptr.
      */
     class Window {
         
@@ -46,7 +45,11 @@ namespace NM {
          @param y the y coordinate on the user's screen to create this window
          */
         Window(std::string title, int width, int height, int x, int y);
+        
         SDL_Window* getWindow() { return window; }
+        
+        ScriptEngine scriptEngine;
+        
     private:
         SDL_Window *window;
     };
