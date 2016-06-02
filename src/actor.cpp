@@ -22,5 +22,11 @@ namespace NM {
     
     const struct mrb_data_type Actor::mrb_type = {"Actor", &NM::mrb::destructor_noop};
     
+    Actor::Actor(const Actor& that) {
+        behaviorClass = that.behaviorClass;
+        mrb = that.mrb;
+        _self = mrb_obj_clone(mrb, that._self);
+        DATA_PTR(_self) = this;
+    }
     
 }

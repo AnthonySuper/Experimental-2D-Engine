@@ -65,7 +65,7 @@ namespace NM { namespace mrb {
      a given class. At some point we should use GC proection instead, but the
      mruby documentation on that is really bad, so we use this hack for now.
      */
-    void destructor_noop(mrb_state *mrb, void *self) {
+    inline void destructor_noop(mrb_state *mrb, void *self) {
         // Do nothing
     }
 

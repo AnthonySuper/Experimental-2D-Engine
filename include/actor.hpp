@@ -32,10 +32,28 @@ namespace NM {
         mrb_value _self;
         
         const static struct mrb_data_type mrb_type;
+        Actor(const Actor&);
+        
+        using CollisionMask = std::bitset<64>;
+        
+        /**
+         @brief A collision mask representing the categories of collision
+         this object belongs to
+         */
+        CollisionMask categoryMask;
+        
+        /**
+         @brief A collision mask representing the categories of collision
+         this object should collide with.
+         
+         Essentially, if we have two actors, A and B, which may be colliding, we
+         perform (A.categoryMask & B.collisionMask) and check the value to
+         determine if we need to check for collision
+         */
+        CollisionMask collisionBitMask;
         
     private:
-        Actor(const Actor&) = delete;
-        
+        mrb_state *mrb;
     };
     
     namespace mrb {
