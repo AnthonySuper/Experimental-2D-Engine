@@ -21,5 +21,10 @@ namespace NM {
         if(window == nullptr) {
             throw WindowCreationFailedError();
         }
+        ctx = SDL_GL_CreateContext(window);
+        if(ctx == nullptr) {
+            throw OpenGLContextNotObtainedError();
+        }
     }
+    
 }

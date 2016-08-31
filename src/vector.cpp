@@ -9,11 +9,11 @@ namespace NM {
         using namespace NM;
         using t = mrb::translator<Vector>;
         t::makeClass(mrb);
-        t::constructor<double, double>::bind(mrb);
-        using doubleRet = t::method<double>;
+        t::constructor<float, float>::bind(mrb);
+        using doubleRet = t::method<float>;
         doubleRet::const_binder<&Vector::getX>::bind(mrb, "x");
         doubleRet::const_binder<&Vector::getY>::bind(mrb, "y");
-        using setters = t::method<double, double>;
+        using setters = t::method<float, float>;
         setters::binder<&Vector::setX>::bind(mrb, "x=");
         setters::binder<&Vector::setY>::bind(mrb, "y=");
         using doubleVec = t::method<double, const Vector&>;

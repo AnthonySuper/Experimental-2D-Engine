@@ -4,7 +4,7 @@ project(nmtt)
 
 enable_testing()
 
-set(PROJECT_SRCS
+set(PROJECT_core_SRCS
   src/util.cpp
   src/window.cpp
   src/actor.cpp
@@ -14,7 +14,7 @@ set(PROJECT_SRCS
   src/scene.cpp
   src/collision_result.cpp)
 
-set(PROJECT_INCLUDES
+set(PROJECT_core_HEADERS
   include/actor.hpp
   include/window.hpp
   include/scene.hpp
@@ -26,7 +26,30 @@ set(PROJECT_INCLUDES
   include/collision_result.hpp
   include/mrb_wrapper.hpp)
 
-add_executable(app app.cpp ${PROJECT_SRCS} ${PROJECT_INCLUDES})
+set(PROJECT_render_SRCS
+  src/render/gl_program.cpp
+  src/render/gl_texture.cpp)
+
+set(PROJECT_render_HEADERS
+  include/render/gl_program.hpp
+  include/render/gl_texture.hpp)
+
+source_group("core\\Source Files" FILES ${PROJECT_core_SRCS})
+source_group("core\\Header Files" FILES ${PROJECT_core_HEADERS})
+source_group("render\\Source Files" FILES ${PROJECT_render_SRCS})
+source_group("render\\Header Files" FILES ${PROJECT_render_HEADERS})
+
+set(PROJECT_SRCS
+  ${PROJECT_core_SRCS}
+  ${PROJECT_render_SRCS})
+
+set(PROJECT_HEADERS
+  ${PROJECT_core_HEADERS}
+  ${PROJECT_render_HEADERS})
+
+add_executable(app app.cpp 
+  ${PROJECT_SRCS} 
+  ${PROJECT_HEADERS})
 
 target_link_libraries(app
   ${CMAKE_SOURCE_DIR}/mruby/build/host/lib/libmruby.a)
@@ -35,22 +58,26 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-
 find_package(SDL2 REQUIRED)
 find_package(SDL2TTF REQUIRED)
 find_package(SDL2_image REQUIRED >= 2.0.0)
-
+find_package(OpenGL REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIR}
   ${SDL2TTF_INCLUDE_DIR}
   ${SDL2_IMAGE_INCLUDE_DIR}
+  ${OPENGL_INCLUDE_DIRS}
+  "lib/"
   "include/"
   "mruby/include/")
 
 target_link_libraries(app
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARY}
-  ${SDL2TTF_LIBRARY})
+  ${SDL2TTF_LIBRARY}
+  ${OPENGL_gl_LIBRARY})
+
+link_libraries(${OPENGL_gl_LIBRARY})
 
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE "lib/")
@@ -62,6 +89,7 @@ add_executable(catch_test test/main.cpp
   test/polygon_test.cpp
   test/mrb_wrapper.cpp)
 
+file(COPY test_files/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_files/)
 
 target_link_libraries(catch_test Catch)
 target_link_libraries(catch_test
@@ -72,5 +100,14 @@ target_link_libraries(catch_test
   ${SDL2_LIBRARY}
   ${SDL2TTF_LIBRARY})
 
+add_custom_command(TARGET app POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  ${CMAKE_CURRENT_SOURCE_DIR}/assets
+  $<TARGET_FILE_DIR:app>/assets)
+
+add_custom_command(TARGET catch_test POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_files
+  $<TARGET_FILE_DIR:catch_test>/test_files)
 
 add_test(NAME CatchTests COMMAND catch_test)

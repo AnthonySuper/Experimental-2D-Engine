@@ -40,7 +40,7 @@ namespace NM {
          * Vectors are defined such that the top-left corner of the grid is (0,0).
          * The X axis runs from left to right, increasing as you move right.
          */
-        double x;
+        float x;
         
 
         
@@ -50,7 +50,7 @@ namespace NM {
          * @remark Vectors are defined such that the top-right corner of the grid is (0,0).
          * The Y axis runs up and down, increasing as you move downwards.
          */
-        double y;
+        float y;
         
         
         /**
@@ -58,7 +58,7 @@ namespace NM {
          @param x The x value of the new vector
          @param y The y value of the new vector
          */
-        Vector(double x, double y);
+        Vector(float x, float y);
         
         /**
          * @brief Default constructor creates the vector {0,0};
@@ -122,16 +122,16 @@ namespace NM {
         
         Vector add(const Vector &other) const;
         
-        double getY() const { return y; }
+        float getY() const { return y; }
         
-        double setY(double _y) {
+        float setY(float _y) {
             y = _y;
             return y;
         }
         
-        double getX() const { return x; }
+        float getX() const { return x; }
         
-        double setX(double _x) {
+        float setX(float _x) {
             x = _x;
             return x;
         }
@@ -182,7 +182,7 @@ namespace NM {
         return x * o.x + y * o.y;
     }
     
-    inline Vector::Vector(double x, double y) {
+    inline Vector::Vector(float x, float y) {
         this->x = x;
         this->y = y;
     }

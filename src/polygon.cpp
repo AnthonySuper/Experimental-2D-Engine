@@ -36,15 +36,15 @@ namespace NM {
      https://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
      */
     void Polygon::calcCentroid() {
-        double area = 0;
-        double cx = 0;
-        double cy = 0;
+        float area = 0;
+        float cx = 0;
+        float cy = 0;
         for(int i = 0; i < points.size(); i++) {
             auto first = points.at(i);
             // Loop around
             auto second = points.at((i == points.size() - 1) ? 0 : i + 1);
             // x_i y_{i+1} - x_{i + 1} y_{i}
-            double abit = (first.x * second.y - second.x * first.y);
+            float abit = (first.x * second.y - second.x * first.y);
             area += abit;
             cx += (first.x + second.x) * abit;
             cy += (first.y + second.y) * abit;

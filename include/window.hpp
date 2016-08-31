@@ -4,8 +4,16 @@
 #include <stdint.h>
 #include <stdexcept>
 #include <string>
+#include "util.hpp"
 #include <SDL.h>
 #include "script_engine.hpp"
+#ifdef __APPLE__
+    #include <OpenGL/gl3.h>
+    #include <OpenGL/gl3ext.h>
+#else
+    #include <GL/gl3.h>
+#endif
+
 
 namespace NM {
     /**
@@ -15,17 +23,6 @@ namespace NM {
     class Window {
         
     public:
-        /**
-         An exception thrown when we cannot create a window.
-         
-         This is a nearly-impossible error to fix, so this is most often used to crash the program
-         with relevant debugging information.
-         */
-        class WindowCreationFailedError : std::runtime_error {
-        public:
-            WindowCreationFailedError() :
-            std::runtime_error(std::string("Window creation failed with message: ") + SDL_GetError()) {};
-        };
         
         /**
          Create a new window with a given title, width, and height
@@ -50,8 +47,33 @@ namespace NM {
         
         ScriptEngine scriptEngine;
         
+        void loadVertexShader(std::string pathname);
+        void loadFragmentShader(std::string pathname);
     private:
+        
         SDL_Window *window;
+        SDL_GLContext ctx;
     };
+    
+    /**
+     An exception thrown when we cannot create a window.
+     
+     This is a nearly-impossible error to fix, so this is most often used to crash the program
+     with relevant debugging information.
+     */
+    class WindowCreationFailedError : std::runtime_error {
+    public:
+        WindowCreationFailedError() :
+        std::runtime_error(std::string("Window creation failed with message: ") + SDL_GetError()) {};
+    };
+    
+    class OpenGLContextNotObtainedError : std::runtime_error {
+    public:
+        OpenGLContextNotObtainedError() :
+        std::runtime_error(SDL_GetError()) {};
+    };
+    
 }
+
+
 #endif
