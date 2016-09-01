@@ -5,6 +5,7 @@
 #include "render/gl_include.hpp"
 #include <string>
 #include "errors.hpp"
+#include <sstream>
 
 namespace NM {
     class GLTexture {
@@ -20,9 +21,14 @@ namespace NM {
             return height;
         }
         
+        inline GLuint getID() const {
+            return id;
+        }
     private:
         GLuint id;
         unsigned int width, height;
     };
+    
+    std::string inspect(const GLTexture &tex);
 }
 #endif

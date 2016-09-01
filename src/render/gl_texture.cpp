@@ -34,4 +34,13 @@ namespace NM {
     void GLTexture::bind() {
         glBindTexture(GL_TEXTURE_2D, id);
     }
+    
+    std::string inspect(const GLTexture &tex) {
+        std::stringstream ss;
+        ss << "OpenGL texture #" << tex.getID();
+        ss << ", Height: " << tex.getHeight();
+        ss << ", Width: " << tex.getWidth();
+        return ss.str();
+    }
+    
 }
