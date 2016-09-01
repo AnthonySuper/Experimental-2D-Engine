@@ -3,11 +3,13 @@
 namespace NM {
     GLTexture::GLTexture(std::string path) {
         SDL_Surface *surf = IMG_Load(path.c_str());
-        
+        GLuint myId;
         if(surf == nullptr) {
-            throw "could not find img";
+            throw BadFileError(path);
         }
-        glGenTextures(1, &id);
+        glGenTextures(1, &myId);
+        id = myId;
+        
         int mode = GL_RGB;
         if(surf->format->BytesPerPixel == 4) {
             mode = GL_RGBA;

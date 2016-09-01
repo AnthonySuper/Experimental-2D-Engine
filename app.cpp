@@ -5,6 +5,7 @@
 #include <SDL_ttf.h>
 #include "window.hpp"
 #include "polygon.hpp"
+#include "render/sprite_sheet.hpp"
 #include "render/gl_program.hpp"
 
 int main(int argc, char* argv[]) {

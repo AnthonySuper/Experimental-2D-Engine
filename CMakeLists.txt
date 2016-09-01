@@ -28,11 +28,15 @@ set(PROJECT_core_HEADERS
 
 set(PROJECT_render_SRCS
   src/render/gl_program.cpp
-  src/render/gl_texture.cpp)
+  src/render/gl_texture.cpp
+  src/render/sprite_sheet.cpp
+  src/render/renderer.cpp)
 
 set(PROJECT_render_HEADERS
   include/render/gl_program.hpp
-  include/render/gl_texture.hpp)
+  include/render/gl_texture.hpp
+  include/render/sprite_sheet.hpp
+  include/render/renderer.hpp)
 
 source_group("core\\Source Files" FILES ${PROJECT_core_SRCS})
 source_group("core\\Header Files" FILES ${PROJECT_core_HEADERS})
@@ -82,12 +86,27 @@ link_libraries(${OPENGL_gl_LIBRARY})
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE "lib/")
 
-add_executable(catch_test test/main.cpp
-  ${PROJECT_SRCS}
+set(PROJECT_core_TEST_SRCS
   test/test_util.cpp
   test/vector_test.cpp
   test/polygon_test.cpp
   test/mrb_wrapper.cpp)
+
+
+set(PROJECT_render_TEST_SRCS
+  test/render/sprite_sheet_test.cpp)
+
+source_group("core\\Test Files" FILES ${PROJECT_core_TEST_SRCS})
+source_group("render\\Test Files" FILES ${PROJECT_render_TEST_SRCS})
+
+
+set(PROJECT_TEST_SRCS
+  ${PROJECT_core_TEST_SRCS}
+  ${PROJECT_render_TEST_SRCS})
+
+add_executable(catch_test test/main.cpp
+  ${PROJECT_SRCS}
+  ${PROJECT_TEST_SRCS})
 
 file(COPY test_files/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_files/)
 

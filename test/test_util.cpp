@@ -10,7 +10,6 @@ TEST_CASE("Factorials are computed", "[factorial]") {
 }
 
 TEST_CASE("Files are read", "[readFile]") {
-    
     auto q = NM::Util::readFile("./test_files/read.txt");
     REQUIRE(q[0] == 'a');
     REQUIRE(q[1] == 'b');
