@@ -14,7 +14,7 @@ namespace NM{
         }
         
         std::vector<char> readFile(std::string pathname) {
-            using isitr = std::istream_iterator<char>;
+            using isitr = std::istreambuf_iterator<char>;
             std::ifstream st(pathname.c_str(), std::ios::binary);
             st >> std::noskipws;
             if(! st.is_open()) {
