@@ -2,7 +2,7 @@
 #define _GL_TEXTURE_H
 
 #include <SDL_image.h>
-#include <OpenGL/gl3.h>
+#include "render/gl_include.hpp"
 #include <string>
 #include "errors.hpp"
 

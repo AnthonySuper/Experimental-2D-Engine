@@ -1,7 +1,7 @@
 #ifndef _SHADER_HPP
 #define _SHADER_HPP
 
-#include <OpenGL/gl3.h>
+#include "render/gl_include.hpp"
 #include <string>
 #include <stdexcept>
 #include <glm/glm.hpp>

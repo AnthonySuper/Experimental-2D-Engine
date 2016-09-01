@@ -35,6 +35,7 @@ set(PROJECT_render_SRCS
 set(PROJECT_render_HEADERS
   include/render/gl_program.hpp
   include/render/gl_texture.hpp
+  include/render/gl_include.hpp
   include/render/sprite_sheet.hpp
   include/render/renderer.hpp)
 
