@@ -6,7 +6,7 @@
 #include <mruby/variable.h>
 #include "polygon.hpp"
 #include "window.hpp"
-#include "render/gl_program.hpp"
+// #include "render/gl_program.hpp"
 #include <chrono>
 #include "world.hpp"
 #include "component_ref.hpp"

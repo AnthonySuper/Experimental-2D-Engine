@@ -97,8 +97,14 @@ include_directories(${SDL2_INCLUDE_DIR}
 target_link_libraries(app
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARY}
-  ${SDL2TTF_LIBRARY}
+  ${SDL2TTF_LIBRARY}a
   ${OPENGL_gl_LIBRARY})
+
+if(UNIX AND NOT APPLE) 
+  find_package(GLEW REQUIRED)
+  include_directories(${GLEW_INCLUDE_DIRS})
+  link_libraries(${GLEW_LIBRARIES})
+endif()
 
 link_libraries(${OPENGL_gl_LIBRARY})
 
