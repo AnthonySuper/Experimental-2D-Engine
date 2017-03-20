@@ -34,6 +34,16 @@ namespace NM {
             return points;
         }
         
+        struct AABB {
+            Point topLeft;
+            Point bottomRight;
+        };
+        
+        const AABB& getBoundingBox() const {
+            return boundingBox;
+        }
+        
+        
     protected:
         /**
          Perform the scalar projection of each point in this vecot onto the axis, and return the extremes
@@ -46,6 +56,8 @@ namespace NM {
          */
         
         void calcCentroid();
+        
+        AABB boundingBox;
         
     private:
         std::vector<Point> points;

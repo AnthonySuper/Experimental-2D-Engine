@@ -8,6 +8,8 @@
 #include <bitset>
 
 namespace NM {
-    class Actor {};
+    class Actor {
+        
+    };
 }
 #endif

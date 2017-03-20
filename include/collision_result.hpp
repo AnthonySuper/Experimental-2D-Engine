@@ -2,6 +2,7 @@
 #define _COLLISION_RESULT_H
 
 #include "vector.hpp"
+#include "message.hpp"
 #include <sstream>
 
 namespace NM {

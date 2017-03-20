@@ -12,7 +12,14 @@ set(PROJECT_core_SRCS
   src/vector.cpp
   src/polygon.cpp
   src/scene.cpp
-  src/collision_result.cpp)
+  src/collision_result.cpp
+  src/sym.cpp
+  src/message.cpp
+  src/physics_world.cpp
+  src/physics_body.cpp
+  src/world.cpp
+  src/entity.cpp
+  src/component_ref.cpp)
 
 set(PROJECT_core_HEADERS
   include/actor.hpp
@@ -24,7 +31,15 @@ set(PROJECT_core_HEADERS
   include/polygon.hpp
   include/errors.hpp
   include/collision_result.hpp
-  include/mrb_wrapper.hpp)
+  include/mrb_wrapper.hpp
+  include/sym.hpp
+  include/message.hpp
+  include/physics_world.hpp
+  include/physics_body.hpp
+  include/world.hpp
+  include/entity.hpp
+  include/component.hpp
+  include/component_ref.hpp)
 
 set(PROJECT_render_SRCS
   src/render/gl_program.cpp

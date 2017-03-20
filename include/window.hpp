@@ -38,12 +38,18 @@ namespace NM {
          */
         Window(std::string title, int width, int height, int x, int y);
         
-        SDL_Window* getWindow() { return window; }
+        inline SDL_Window* getWindow() { return window; }
+        
+        inline void swapBuffer() {
+            SDL_GL_SwapWindow(window);
+        }
+        
+        inline void clearScreen() {
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
         
         ScriptEngine scriptEngine;
         
-        void loadVertexShader(std::string pathname);
-        void loadFragmentShader(std::string pathname);
     private:
         
         SDL_Window *window;

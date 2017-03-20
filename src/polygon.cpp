@@ -4,7 +4,6 @@
 #include <tuple>
 
 namespace NM {
-    
     Polygon::Polygon(std::initializer_list<Point> _points) {
         points = std::vector<Point>(_points);
         calcCentroid();
@@ -21,7 +20,6 @@ namespace NM {
     }
     
     void Polygon::translateVia(const NM::Vector &v) {
-        
         for(auto p: points) {
             p.x += v.x;
             p.y += v.y;
@@ -29,6 +27,10 @@ namespace NM {
         // Also move the origin with respect to the translation
         centroid.x += v.x;
         centroid.y += v.y;
+        boundingBox.topLeft.x += v.x;
+        boundingBox.topLeft.y += v.y;
+        boundingBox.bottomRight.x += v.x;
+        boundingBox.bottomRight.y += v.y;
     }
     
     /*
@@ -36,6 +38,8 @@ namespace NM {
      https://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
      */
     void Polygon::calcCentroid() {
+        Point topLeft = points[0];
+        Point bottomRight = points[0];
         float area = 0;
         float cx = 0;
         float cy = 0;
@@ -48,11 +52,16 @@ namespace NM {
             area += abit;
             cx += (first.x + second.x) * abit;
             cy += (first.y + second.y) * abit;
+            topLeft = {std::min(topLeft.x, first.x),
+                std::min(topLeft.y, first.y)};
+            bottomRight = {std::max(bottomRight.x, first.x),
+                std::max(bottomRight.y, first.y)};
         }
         area /= 2;
         cx /= (area * 6);
         cy /= (area * 6);
         centroid = {cx, cy};
+        boundingBox = {topLeft, bottomRight};
     }
     
     

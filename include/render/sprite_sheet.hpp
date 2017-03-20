@@ -1,12 +1,13 @@
 #ifndef _SPRITESHEET_HPP
 #define _SPRITESHEET_HPP
 #include "render/gl_texture.hpp"
+#include "mrb_wrapper.hpp"
 #include <string>
 #include <stdexcept>
 
 
 namespace NM {
-    class Spritesheet {
+    class SpriteSheet {
     private:
         GLTexture tex;
         
@@ -16,13 +17,9 @@ namespace NM {
         const unsigned int sheetWidth;
         const unsigned int sheetHeight;
         
-        Spritesheet(std::string path,
+        SpriteSheet(std::string path,
                     unsigned int width,
                     unsigned int height);
-        
-        inline void setTileIndex(unsigned int in) {
-            tileIndex = in;
-        }
         
         class MisalignedSheetError : public std::runtime_error {
         public:
@@ -31,9 +28,9 @@ namespace NM {
             {}
         };
         
+        const static struct mrb_data_type mrb_type;
         
-    private:
-        unsigned int tileIndex;
+        void bindMRB(mrb_state *mrb);
 
     };
 }

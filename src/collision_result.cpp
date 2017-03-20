@@ -8,7 +8,6 @@ namespace NM {
     
     CollisionResult::CollisionResult(NM::Vector v) : hasResult(true),
         mtv(v) {
-        
     }
     
     std::string inspect(const CollisionResult &r) {

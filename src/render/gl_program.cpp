@@ -71,7 +71,7 @@ namespace NM {
         vertId = glCreateShader(GL_VERTEX_SHADER);
         fragId = glCreateShader(GL_FRAGMENT_SHADER);
         const char *v_str = ver.c_str();
-        const char *f_str = ver.c_str();
+        const char *f_str = frag.c_str();
         glShaderSource(vertId, 1, &v_str, nullptr);
         glShaderSource(fragId, 1, &f_str, nullptr);
         glCompileShader(vertId);

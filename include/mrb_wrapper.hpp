@@ -356,6 +356,12 @@ namespace NM { namespace mrb {
     struct param_char<bool> {
         constexpr static auto value = 'b';
     };
+    
+    // s is for string
+    template<>
+    struct param_char<std::string> {
+        constexpr static auto value = 's';
+    };
 
 
 
@@ -535,7 +541,10 @@ namespace NM { namespace mrb {
             static void bind(mrb_state *mrb) {
                 mrb_func_t  f = &val;
                 mrb_define_class_method(mrb,
-                                        getClass(mrb), "new", f, MRB_ARGS_REQ(sizeof...(Args)));
+                                        getClass(mrb),
+                                        "new",
+                                        f,
+                                        MRB_ARGS_REQ(sizeof...(Args)));
             }
 
         private:
@@ -545,7 +554,10 @@ namespace NM { namespace mrb {
                 translator<T>::fill_tuple(format, mrb, t, std::index_sequence_for<Args...>{});
                 translator<T>::fill_mrb_values(mrb, t, std::index_sequence_for<Args...>{});
                 T* constructed = make_call(t, std::index_sequence_for<Args...>{});
-                return mrb_obj_value(Data_Wrap_Struct(mrb, getClass(mrb), data_type<T>::value, (void *) constructed));
+                return mrb_obj_value(Data_Wrap_Struct(mrb,
+                                                      getClass(mrb),
+                                                      data_type<T>::value,
+                                                      (void *) constructed));
             }
 
             template<class Tuple, std::size_t... indexes>

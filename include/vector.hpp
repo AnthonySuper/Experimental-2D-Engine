@@ -14,11 +14,8 @@ namespace NM {
      @breif A class representing a vector in 2D space
      
      @discussion This type represents either a vector or a point in space, and is
-     used heavily throughout the rest of the engine. It has two members, X and Y.
-     Y runs vertically on a screen, X horizontally.
-     The top-left corner of the coordinate grid is defined as (0, 0).
-     Y increases as you move downwards on the grid, and X increases as you move right.
-     This is a vertical flip of the typical coordinate system, mostly because SDL uses the same thing.
+     used heavily throughout the rest of the engine. 
+     It has two members, X and Y.
      */
     class Vector final {
         
