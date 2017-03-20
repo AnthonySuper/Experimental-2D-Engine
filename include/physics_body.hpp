@@ -28,7 +28,10 @@ namespace NM {
         
     protected:
         double mass;
+        double restitution;
         Polygon outline;
+        Vector velocity;
+        Vector position;
     };
    
     class CollisionMessage : public Message {

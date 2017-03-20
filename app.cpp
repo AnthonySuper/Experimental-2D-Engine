@@ -17,11 +17,13 @@ std::chrono::milliseconds getTime() {
 }
 
 
+
+
 int main(int argc, char* argv[]) {
     
     NM::World w;
     NM::ComponentRef e = w.create<NM::PhysicsBody>(10, {{0, 0}, {1, 0}, {1, 1}});
-    std::cout << e.getUnsafe().getName() << std::endl;
+    std::cout << e.get<NM::Component>().getName() << std::endl;
     auto b = e.get<NM::NullComponent>();
     std::cout << b.getName() << std::endl;
     
