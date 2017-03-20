@@ -3,10 +3,12 @@
 
 #include "component_ref.hpp"
 #include "message.hpp"
-#include "world.hpp"
 #include <vector>
 
 namespace NM {
+    
+    class World;
+    
     class Entity {
         
     public:
@@ -28,9 +30,7 @@ namespace NM {
         const int id;
         
     public:
-        Entity& get() {
-            return world.getEntity(id);
-        }
+        Entity& get();
     };
     
 }

@@ -1,4 +1,5 @@
 #include "entity.hpp"
+#include "world.hpp"
 
 namespace NM {
     Entity::Entity(World &w) : world(w) {}
@@ -12,5 +13,9 @@ namespace NM {
     
     void Entity::addComponent(NM::ComponentRef &c) {
         
+    }
+    
+    Entity& EntityRef::get() {
+        return world.getEntity(id);
     }
 }

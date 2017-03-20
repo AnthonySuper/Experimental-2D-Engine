@@ -19,7 +19,7 @@ namespace NM {
     
     EntityRef World::createEntity() {
         int id = entities.size();
-        entities.emplace_back(*this, id);
+        entities.emplace_back(*this);
         return EntityRef(*this, id);
     }
     

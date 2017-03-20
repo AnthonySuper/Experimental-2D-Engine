@@ -7,6 +7,8 @@
 #include "component_ref.hpp"
 
 namespace NM {
+    class Component;
+    
     class PhysicsBody : public Component {
     public:
         PhysicsBody(double mass, Polygon polygon);
@@ -25,6 +27,8 @@ namespace NM {
         inline Polygon& getOutline() {
             return outline;
         }
+        
+        void receive(Message &m) override;
         
     protected:
         double mass;

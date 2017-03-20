@@ -18,7 +18,6 @@ std::chrono::milliseconds getTime() {
 
 
 
-
 int main(int argc, char* argv[]) {
     
     NM::World w;

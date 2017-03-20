@@ -11,19 +11,7 @@ namespace NM {
         virtual std::string getName() = 0;
         // this is a real component
         virtual operator bool() { return true; }
-        // by default, we don't respond to messages
-        virtual void receive(Message& m) {}
-        
-        inline void attachTo(EntityRef entity) {
-            parent = entity;
-        }
-        
-        inline Entity& getEntity() {
-            return parent.get();
-        }
-        
-    protected:
-        EntityRef parent;
+        virtual void receive(Message& m) = 0;
     };
     
     class NullComponent : public Component {

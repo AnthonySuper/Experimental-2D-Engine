@@ -5,4 +5,8 @@ namespace NM {
     mass(mass), outline(polygon) {
         
     }
+    
+    void PhysicsBody::receive(NM::Message &m) {
+        // do nothing!
+    }
 }

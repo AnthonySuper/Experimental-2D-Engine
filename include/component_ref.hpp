@@ -5,11 +5,9 @@
 #include <stdexcept>
 #include <string>
 
-#include "component.hpp"
-
 namespace NM {
     class World;
-    
+    class Component;
     class ComponentRef {
     protected:
         const std::type_index type;
