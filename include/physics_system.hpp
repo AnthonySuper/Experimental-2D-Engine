@@ -1,5 +1,5 @@
-#ifndef _NM_PHYSICS_WORLD_HPP
-#define _NM_PHYSICS_WORLD_HPP
+#ifndef _NM_PHYSICS_SYSTEM_HPP
+#define _NM_PHYSICS_SYSTEM_HPP
 
 #include "physics_body.hpp"
 #include "vector.hpp"
@@ -9,15 +9,11 @@
 namespace NM {
     class world;
     
-    class PhysicsWorld {
+    class PhysicsSystem {
     public:
-        PhysicsWorld(World *world);
+        PhysicsSystem(World *world);
         
-        template<typename ...Args>
-        int constructMember(Args... args) {
-            bodies.emplace_back(std::forward<Args>(args)...);
-            return bodies.size() - 1;
-        }
+        ComponentRef createChild(EntityRef ref);
         
         PhysicsBody& getForId(int id) {
             return bodies.at(id);
@@ -26,8 +22,6 @@ namespace NM {
         std::vector<PhysicsBody> bodies;
         
         void update();
-        
-        
         
     private:
         void calcCollisions();

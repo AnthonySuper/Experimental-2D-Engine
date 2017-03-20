@@ -6,13 +6,13 @@
 #include <string>
 
 namespace NM {
-    class World;
     class Component;
+    class World;
     class ComponentRef {
     protected:
         const std::type_index type;
         int idx;
-        World *world;
+        World* world;
         
     public:
         template<typename T>
@@ -24,7 +24,6 @@ namespace NM {
         bool is();
         
         ComponentRef(const std::type_index, int, World*);
-        
     };
     
     struct ComponentCastError : std::runtime_error {

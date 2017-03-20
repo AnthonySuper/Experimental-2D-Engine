@@ -7,7 +7,7 @@ namespace NM {
             return physics.getForId(it);
         }
         else {
-            return NullComponent::getInstance();
+            throw std::runtime_error("No such component!");
         }
     }
     
@@ -19,8 +19,8 @@ namespace NM {
     
     EntityRef World::createEntity() {
         int id = entities.size();
-        entities.emplace_back(*this);
-        return EntityRef(*this, id);
+        entities.emplace_back(this, id);
+        return EntityRef(this, id);
     }
     
     Entity& World::getEntity(int id) {

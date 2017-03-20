@@ -11,7 +11,9 @@ namespace NM {
     
     class PhysicsBody : public Component {
     public:
-        PhysicsBody(double mass, Polygon polygon);
+        PhysicsBody();
+        PhysicsBody(EntityRef e);
+        
         std::string getName() override {
             return "PhysicsBody";
         }

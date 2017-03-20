@@ -1,13 +1,13 @@
-#include "physics_world.hpp"
+#include "physics_system.hpp"
 #include "world.hpp"
 
 namespace NM {
     
-    void PhysicsWorld::update() {
+    void PhysicsSystem::update() {
         // do some updating or something
     }
     
-    void PhysicsWorld::calcCollisions() {
+    void PhysicsSystem::calcCollisions() {
         // Right now we have the worst collisions in the world!
         std::vector<CollisionResult> collisions;
         for(int i = 0; i < bodies.size(); ++i) {
@@ -22,6 +22,12 @@ namespace NM {
         }
     }
     
-    PhysicsWorld::PhysicsWorld(World *world) : world(world) {}
+    PhysicsSystem::PhysicsSystem(World *world) : world(world) {}
+    
+    ComponentRef PhysicsSystem::createChild(EntityRef ref) {
+        int id = bodies.size();
+        bodies.emplace_back(ref);
+        return {typeid(PhysicsBody), id, world};
+    }
     
 }
