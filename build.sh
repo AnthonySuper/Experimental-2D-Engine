@@ -20,6 +20,6 @@ if [ "$TRAVIS_OS_NAME" = osx ]; then
 	Debug/catch_test
 else
 	cmake ..
-	make VERBOSE=1 -j2 all
+	make VERBOSE=1 -j2 catch_test
 	./catch_test
 fi
