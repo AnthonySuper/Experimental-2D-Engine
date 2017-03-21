@@ -6,20 +6,13 @@ set -ex
 
 # Override CXX if specified by the CI environment.
 if [ -n "$COMPILER" ]; then
-	export CXX="$COMPILER"
+  export CXX="$COMPILER"
 fi
 
 # Generate our build directory.
 mkdir -p build
 cd build
 
-# Build and run everything.
-if [ "$TRAVIS_OS_NAME" = osx ]; then
-	cmake -G Xcode ..
-	xcodebuild
-	Debug/catch_test
-else
-	cmake ..
-	make VERBOSE=1 -j2 catch_test
-	./catch_test
-fi
+cmake ..
+make VERBOSE=1 -j2 catch_test
+./catch_test
