@@ -4,6 +4,7 @@
 #include <string>
 #include <typeinfo>
 #include <type_traits>
+#include <stdexcept>
 
 namespace NM {
     class Message {
